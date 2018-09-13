@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="debugfilename">debug.log</Property>
+        <Property name="errorfilename">error.log</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%-4.-4t] %-5.-5p %-18.-18c{1} - %msg%n"/>
+        </Console>
+        <File name="DebugFile" fileName="${debugfilename}">
+            <PatternLayout>
+                <pattern>%d %-5.-5p [%-4.-4t] %-18.-18c{1} - %m%n</pattern>
+            </PatternLayout>
+        </File>
+        <File name="ErrorFile" fileName="${errorfilename}">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>%d [%-4.-4t] %-25.-25c{1} - %m%n</pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="ErrorFile"/>
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="DebugFile"/>
+        </Root>
+        <!--<Logger name="org.jdbi.v3" level="trace">-->
+        <!--<AppenderRef ref="Console"/>-->
+        <!--<AppenderRef ref="DebugFile"/>-->
+        <!--</Logger>-->
+    </Loggers>
+</Configuration>
