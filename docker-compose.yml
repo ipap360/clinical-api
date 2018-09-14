@@ -10,13 +10,29 @@ services:
 #      - backend
     ports:
     # remember that you need to also fwd the ports in the virtual machine
-      - "${SQL_PORT}:3306"
+      - "${SQL_PORT}"
     command: ["mysqld", "--innodb_use_native_aio=0", "--character-set-server=utf8",  "--collation-server=utf8_general_ci", "--init-connect='SET NAMES UTF8;'",  "--innodb-flush-log-at-trx-commit=0"]
     # env_file:
       # - ./local.env    
     environment:
       - MYSQL_ROOT_PASSWORD=${SQL_PASSWORD}
       - TZ=UTC
+      - MYSQL_TCP_PORT=${SQL_PORT}
+    expose:
+      - ${SQL_PORT}
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbit
+    container_name: rabbit
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    # volumes:
+      # - "./rabbit:/var/lib/rabbitmq/mnesia"
+    environment:
+#      - RABBITMQ_ERLANG_COOKIE=${RABBIT_ERL_COOKIE}
+      - RABBITMQ_DEFAULT_USER=${RABBIT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBIT_PASS}
 #  redis:
 #    image: redis:alpine
 #    ports:

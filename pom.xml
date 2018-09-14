@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,7 +9,7 @@
     <version>0.0.1</version>
 
     <properties>
-        <app.main.class>com.team360.hms.Main</app.main.class>
+        <app.main.class>com.team360.hms.admissions.Main</app.main.class>
         <project.resources.directory>src/main/resources</project.resources.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -266,7 +266,7 @@
                                             <transformer
                                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                                 <manifestEntries>
-                                                    <com.team360.hms.Main-Class>${app.main.class}</com.team360.hms.Main-Class>
+                                                    <Main-Class>${app.main.class}</Main-Class>
                                                     <X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
                                                     <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>
                                                 </manifestEntries>
@@ -278,7 +278,7 @@
                         </plugin>-->
             <!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>exec-maven-plugin</artifactId>
             <version>1.2.1</version> <executions> <execution> <goals> <goal>java</goal>
-            </goals> </execution> </executions> <configuration> <mainClass>com.ipap.auth.com.team360.hms.Main</mainClass>
+            </goals> </execution> </executions> <configuration> <mainClass>com.ipap.auth.Main</mainClass>
             </configuration> </plugin> -->
         </plugins>
     </build>

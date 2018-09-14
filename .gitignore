@@ -3,7 +3,10 @@
 #
 
 db
+rabbit
 .env
+debug.log
+error.log
 
 #
 # Default excludes

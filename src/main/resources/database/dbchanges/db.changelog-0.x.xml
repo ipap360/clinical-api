@@ -93,7 +93,7 @@
         </rollback>
     </changeSet>
     <changeSet author="ipap" id="2">
-        <customChange class="data.PopulateDBDates"/>
+        <customChange class="com.team360.hms.admissions.data.PopulateDBDates"/>
     </changeSet>
     <changeSet author="ipap" id="3">
         <createTable tableName="REGISTRATIONS">
@@ -104,7 +104,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="PASSWORD" type="text"/>
-            <column name="STATUS" type="int"/>
+            <column name="STATUS" type="varchar(255)"/>
             <column name="RETRIES" type="int"/>
             <column name="IP" type="varchar(255)"/>
             <column name="USER_AGENT" type="varchar(255)"/>
@@ -120,12 +120,12 @@
             <dropTable tableName="REGISTRATIONS"/>
         </rollback>
     </changeSet>
-<!--    <changeSet author="ipap" id="3">
-        <createView replaceIfExists="true"
-                    viewName="CALENDAR_VIEW">
+    <!--    <changeSet author="ipap" id="3">
+            <createView replaceIfExists="true"
+                        viewName="CALENDAR_VIEW">
 
-        </createView>
-    </changeSet>-->
+            </createView>
+        </changeSet>-->
     <!--    <changeSet author="ipap" id="init_indexes">
             <createIndex catalogName=""
                          indexName="EMAIL_STATUS_IDX"
