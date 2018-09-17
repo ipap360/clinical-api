@@ -9,8 +9,4 @@ public class LoginForm {
 
     private String password;
 
-/*    private String userAgent;
-
-    private String ip;*/
-
 }

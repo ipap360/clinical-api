@@ -65,6 +65,7 @@ public class Main {
                     .context(System.getenv(CONTEXT))
                     .endpoints("com.team360.hms")
                     .secret(System.getenv(SIGNATURE_KEY))
+//                    .accessTokenTimeout(1 * 20)
                     .build();
 
             WebServerManager.start(web);

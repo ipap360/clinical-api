@@ -50,11 +50,11 @@ public class RoomAvailabilityEndpoint extends GenericEndpoint {
             map.forEach((v) -> {
 
                 // todo: check what is going on with the case
-                Date d = (Date) v.get("id");
-                int cnt = ((Long) v.get("cnt")).intValue();
-                String gender = (String) v.get("gender");
+                LocalDate d = (LocalDate) v.get("ID");
+                int cnt = ((Long) v.get("CNT")).intValue();
+                String gender = (String) v.get("GENDER");
 
-                RoomAvailability props = days.get(d.toLocalDate());
+                RoomAvailability props = days.get(d);
 
                 if (Gender.MALE.name().equals(gender)) {
                     props.setMale(cnt);

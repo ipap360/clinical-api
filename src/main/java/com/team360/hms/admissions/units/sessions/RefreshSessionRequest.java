@@ -9,8 +9,4 @@ public class RefreshSessionRequest {
 
     private String refreshToken;
 
-    private String userAgent;
-
-    private String ip;
-
 }

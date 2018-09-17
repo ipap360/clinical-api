@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper=true)
 @DBEntityMeta(name = "CALENDAR_EVENTS", label = "Event")
-public class CalendarEvent extends GenericEntity {
+public class CalendarEvent extends GenericEntity implements Cloneable {
 
     @DBEntityField(name = "NOTES")
     private String notes;
@@ -43,26 +43,12 @@ public class CalendarEvent extends GenericEntity {
         return admissionDate.until(releaseDate).getDays();
     }
 
-//    @Override
-//    public CalendarEvent load(Map map) {
-//        super.load(map);
-//        patientId = (Integer) map.get("PATIENT_ID");
-//        admissionDate = (LocalDate) map.get("ADMISSION_DATE");
-//        releaseDate = (LocalDate) map.get("RELEASE_DATE");
-//        notes = (String) map.get("NOTES");
-//        postponeId = (Integer) map.get("POSTPONE_ID");
-//        return this;
-//    }
-//
-//    @Override
-//    public Map<String, ?> toMap() {
-//        Map map = super.toMap();
-//        map.put("PATIENT_ID", patientId);
-//        map.put("ADMISSION_DATE", admissionDate);
-//        map.put("RELEASE_DATE", releaseDate);
-//        map.put("NOTES", notes);
-//        map.put("POSTPONE_ID", postponeId);
-//        return map;
-//    }
+    public CalendarEvent load(CalendarEventForm form) {
+        setPatientId(form.getPatient());
+        setNotes(form.getNotes());
+        setAdmissionDate(form.getDate());
+        setReleaseDate(form.getDate().plusDays(form.getDuration()));
+        return this;
+    }
 
 }

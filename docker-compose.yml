@@ -10,7 +10,7 @@ services:
 #      - backend
     ports:
     # remember that you need to also fwd the ports in the virtual machine
-      - "${SQL_PORT}"
+      - "${SQL_PORT}:${SQL_PORT}"
     command: ["mysqld", "--innodb_use_native_aio=0", "--character-set-server=utf8",  "--collation-server=utf8_general_ci", "--init-connect='SET NAMES UTF8;'",  "--innodb-flush-log-at-trx-commit=0"]
     # env_file:
       # - ./local.env    

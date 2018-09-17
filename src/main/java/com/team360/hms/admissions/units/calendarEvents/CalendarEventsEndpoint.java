@@ -1,6 +1,6 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
-import com.team360.hms.admissions.common.exceptions.MultiValueRequestException;
+import com.team360.hms.admissions.common.exceptions.FormValidationException;
 import com.team360.hms.admissions.web.GenericEndpoint;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.slf4j.Slf4j;
@@ -45,27 +45,12 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, CalendarEventForm form) {
-        validate(id, form);
+        form.validate(id);
         CalendarEvent event = new CalendarEvent();
         event.setId(id);
-        event.setNotes(form.getNotes());
-        event.setAdmissionDate(form.getDate());
-        event.setReleaseDate(form.getDate().plusDays(form.getDuration()));
+        event.load(form);
         db().upsert(event);
         return Response.ok().build();
-    }
-
-    private void validate(Integer id, CalendarEventForm form) {
-        HashMap errors = new HashMap();
-        if (form.getPatientId() == null) {
-            errors.put("patientId", "Please select a patient");
-        }
-        if (form.getDate() == null) {
-            errors.put("date", "Please select a valid date");
-        }
-        if (!errors.isEmpty()) {
-            throw new MultiValueRequestException(errors);
-        }
     }
 
     @POST
@@ -99,6 +84,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
         db().read(event1);
 
         CalendarEvent event2 = new CalendarEvent();
+        event2.setPatientId(event1.getPatientId());
         event2.setNotes(form.getNotes());
         event2.setAdmissionDate(form.getDate());
         event2.setReleaseDate(form.getDate().plusDays(event1.getDuration()));

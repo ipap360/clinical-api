@@ -1,10 +1,10 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
-import lombok.Value;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Value
+@Data
 public class CalendarEventCopyForm {
 
     private LocalDate date;

@@ -37,7 +37,7 @@ public class SessionEndpoint extends GenericEndpoint {
     @GET
     @Secured
     public Response get(@HeaderParam("userId") Integer userId, @QueryParam("uuid") String uuid) {
-        return Response.ok().entity(SessionDao.findByUuidAndUserId(uuid, userId)).build();
+        return Response.ok().entity(new SessionDetails().load(SessionDao.findByUuidAndUserId(uuid, userId))).build();
     }
 
     @POST
@@ -149,11 +149,8 @@ public class SessionEndpoint extends GenericEndpoint {
         return Response.ok().cookie(rc1, rc2, ac, xc).build();
     }
 
-    private NewCookie setExpired(Cookie cookie) {
-        if (cookie == null) {
-            return null;
-        }
-        return new NewCookie(cookie, null, 0, ZERO_DATE, false, false);
+    private NewCookie setExpired(Cookie c) {
+        return (c == null) ? null : new NewCookie(c, null, 0, ZERO_DATE, false, false);
     }
 
     private Response wrapResponse(SessionAcquiredSuccessfully entity) {

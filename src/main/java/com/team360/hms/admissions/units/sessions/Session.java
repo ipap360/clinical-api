@@ -40,43 +40,4 @@ public class Session extends GenericEntity {
         return this;
     }
 
-/*    @Override
-    public DBTable getTable() {
-        return null;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return null;
-    }*/
-
-/*    @Override
-    public DBEntity load(Map map) {
-
-        super.load(map);
-
-        setUuid((String) map.get("UUID"));
-        setIp((String) map.get("IP"));
-        setUserAgent((String) map.get("USER_AGENT"));
-        setUserId((Integer) map.get("USER_ID"));
-        setSecret((String) map.get("SECRET"));
-        setExpiresAt((Instant) map.get("EXPIRES_AT"));
-
-        return this;
-    }
-
-    @Override
-    public Map toMap() {
-
-        Map m = super.toMap();
-
-        m.put("UUID", getUuid());
-        m.put("IP", getIp());
-        m.put("USER_AGENT", getUserAgent());
-        m.put("USER_ID", getUserId());
-        m.put("SECRET", getSecret());
-        m.put("EXPIRES_AT", getExpiresAt());
-
-        return m;
-    }*/
 }

@@ -35,26 +35,15 @@ public class Patient extends GenericEntity {
         return LocalDate.now().get(ChronoField.YEAR) - birthYear;
     }
 
-//    @Override
-//    public Patient load(Map map) {
-//        super.load(map);
-//        name = (String) map.get("NAME");
-//        code = (String) map.get("CODE");
-//        notes = (String) map.get("NOTES");
-//        birthYear = (Integer) map.get("BIRTH_YEAR");
-//        gender = (Gender) map.get("GENDER");
-//        return this;
-//    }
-//
-//    @Override
-//    public Map<String, ?> toMap() {
-//        Map map = super.toMap();
-//        map.put("NAME", name);
-//        map.put("CODE", code);
-//        map.put("NOTES", notes);
-//        map.put("BIRTH_YEAR", birthYear);
-//        map.put("GENDER", gender);
-//        return map;
-//    }
+    public Patient load (PatientForm form) {
+
+        setName(form.getName());
+        setCode(form.getCode());
+        setNotes(form.getNotes());
+        setBirthYear(form.getBirthYear());
+        setGender(form.getGender());
+
+        return this;
+    }
 
 }

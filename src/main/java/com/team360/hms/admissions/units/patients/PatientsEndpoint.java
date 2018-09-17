@@ -1,6 +1,6 @@
 package com.team360.hms.admissions.units.patients;
 
-import com.team360.hms.admissions.common.exceptions.MultiValueRequestException;
+import com.team360.hms.admissions.db.DBEntity;
 import com.team360.hms.admissions.web.GenericEndpoint;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Slf4j
 @Path("patients")
@@ -18,6 +20,7 @@ public class PatientsEndpoint extends GenericEndpoint {
 
     @GET
     public Response get() {
+//        Stream<DBEntity> s = .stream().map((map) -> new Patient().load(map));
         return Response.ok().entity(new PatientDao().list()).build();
     }
 
@@ -35,28 +38,14 @@ public class PatientsEndpoint extends GenericEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, PatientForm form) {
-        validate(id, form);
+        form.validate(id);
         Patient patient = new Patient();
         patient.setId(id);
-        patient.setNotes(form.getNotes());
-        patient.setBirthYear(form.getBirthYear());
-        patient.setGender(form.getGender());
-        db().upsert(patient);
+        db().upsert(patient.load(form));
         return Response.ok().build();
     }
 
-    private void validate(Integer id, PatientForm form) {
-        HashMap errors = new HashMap();
-        if (form.getName() == null) {
-            errors.put("name", "Please fill the name");
-        }
-//        if (form.getGender() == null) {
-//            errors.put("gender", "Please select a gender");
-//        }
-        if (!errors.isEmpty()) {
-            throw new MultiValueRequestException(errors);
-        }
-    }
+
 
     @POST
     @Path("/{id}/delete")

@@ -1,8 +1,8 @@
 package com.team360.hms.admissions.units.sessions;
 
-import lombok.Value;
+import lombok.Data;
 
-@Value
+@Data
 public class ExpireSessionRequest {
 
     private String uuid;

@@ -5,10 +5,6 @@ import lombok.Data;
 @Data
 public class RegistrationForm {
 
-/*    private String ip;
-
-    private String userAgent;*/
-
     private String email;
 
     private String password;
