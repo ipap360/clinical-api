@@ -1,1 +1,3 @@
-# his-admissions-plan-api
+# Hospital Admissions Planner API
+
+Java API
