@@ -1,0 +1,5 @@
+https://www.rabbitmq.com/tutorials/tutorial-one-java.html
+
+https://www.rabbitmq.com/api-guide.html
+
+http://localhost:3000/signup/confirm/eyJlbWFpbCI6Imp1YW4uZWUuZ3JAZ21haWwuY29tIiwidG9rZW4iOiJPMTMxVWlsYzlhIn0=
