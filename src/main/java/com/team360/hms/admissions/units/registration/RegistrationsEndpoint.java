@@ -3,15 +3,17 @@ package com.team360.hms.admissions.units.registration;
 import com.team360.hms.admissions.common.policies.LongPasswordPolicy;
 import com.team360.hms.admissions.common.values.EmailAddress;
 import com.team360.hms.admissions.common.values.HashedString;
-import com.team360.hms.admissions.common.values.RandomToken;
-import com.team360.hms.admissions.web.GenericEndpoint;
 import com.team360.hms.admissions.common.values.Message;
-import com.team360.hms.admissions.web.filters.IFilter;
+import com.team360.hms.admissions.common.values.RandomToken;
+import com.team360.hms.admissions.units.WebUtl;
 import com.team360.hms.admissions.units.users.User;
-import lombok.extern.slf4j.Slf4j;
+import com.team360.hms.admissions.web.filters.IFilter;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONObject;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,10 +21,13 @@ import java.util.Base64;
 import java.util.Optional;
 import java.util.UUID;
 
-@Slf4j
+@Log4j2
 @Path("registrations")
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-public class RegistrationsEndpoint extends GenericEndpoint {
+public class RegistrationsEndpoint {
+
+    @Context
+    ContainerRequestContext crc;
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -33,9 +38,9 @@ public class RegistrationsEndpoint extends GenericEndpoint {
         Registration registration = new Registration();
         Optional<Integer> id = new RegistrationDao().findByEmail(form.getEmail());
         if (id.isPresent()) {
-            db().read(registration.setId(id.get()));
+            WebUtl.db(crc).read(registration.setId(id.get()));
             if (registration.isPending()) {
-                db().update(registration.inc());
+                WebUtl.db(crc).update(registration.inc());
                 if (registration.isTryingHard()) {
                     // TODO: notify someone. this person is trying again and again without opening their emails
                     // TODO: maybe change the message too
@@ -62,7 +67,7 @@ public class RegistrationsEndpoint extends GenericEndpoint {
         registration.setTimezone(form.getTimezone());
         registration.setToken(HashedString.of(token).getValue());
 
-        db().create(registration);
+        WebUtl.db(crc).create(registration);
 
         return Response.ok().entity(new Message("Thank you for signing up!")).build();
     }
@@ -83,7 +88,7 @@ public class RegistrationsEndpoint extends GenericEndpoint {
         }
 
         Registration registration = new Registration();
-        db().read(registration.setId(id.get()));
+        WebUtl.db(crc).read(registration.setId(id.get()));
 
         HashedString hashedToken = HashedString.fromHash(registration.getToken());
         boolean isTokenValid = hashedToken.isHashOf(key);
@@ -111,7 +116,7 @@ public class RegistrationsEndpoint extends GenericEndpoint {
         user.setRegistrationId(registration.getId());
         user.setUuid(UUID.randomUUID().toString());
 
-        db().upsert(registration, user);
+        WebUtl.db(crc).upsert(registration, user);
 
         return Response.status(Response.Status.CREATED).entity(new Message("Your registration has been successfully completed!")).build();
 

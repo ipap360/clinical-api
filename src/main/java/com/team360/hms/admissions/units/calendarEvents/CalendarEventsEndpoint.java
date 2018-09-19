@@ -1,20 +1,23 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
-import com.team360.hms.admissions.common.exceptions.FormValidationException;
-import com.team360.hms.admissions.web.GenericEndpoint;
+import com.team360.hms.admissions.units.WebUtl;
 import com.team360.hms.admissions.web.filters.Secured;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 
 import javax.ws.rs.*;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 
 @Secured
-@Slf4j
+@Log4j2
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
 @Path("calendar-events")
-public class CalendarEventsEndpoint extends GenericEndpoint {
+public class CalendarEventsEndpoint {
+
+    @Context
+    ContainerRequestContext crc;
 
     @GET
     public Response get(
@@ -36,7 +39,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response view(@PathParam("id") Integer id) {
         CalendarEvent event = new CalendarEvent();
-        db().read(event.setId(id));
+        WebUtl.db(crc).read(event.setId(id));
         CalendarEventForm form = new CalendarEventForm();
         return Response.ok().entity(form.load(event)).build();
     }
@@ -49,7 +52,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
         CalendarEvent event = new CalendarEvent();
         event.setId(id);
         event.load(form);
-        db().upsert(event);
+        WebUtl.db(crc).upsert(event);
         return Response.ok().build();
     }
 
@@ -59,7 +62,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
     public Response delete(@PathParam("id") Integer id) {
         CalendarEvent event = new CalendarEvent();
         event.setId(id);
-        db().delete(event);
+        WebUtl.db(crc).delete(event);
         return Response.ok().build();
     }
 
@@ -81,7 +84,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
 
         CalendarEvent event1 = new CalendarEvent();
         event1.setId(id);
-        db().read(event1);
+        WebUtl.db(crc).read(event1);
 
         CalendarEvent event2 = new CalendarEvent();
         event2.setPatientId(event1.getPatientId());
@@ -97,7 +100,7 @@ public class CalendarEventsEndpoint extends GenericEndpoint {
             event1.setIsCompleted(true);
         }
 
-        db().upsert(event1, event2);
+        WebUtl.db(crc).upsert(event1, event2);
         return event2;
     }
 

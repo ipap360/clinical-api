@@ -3,7 +3,7 @@ package com.team360.hms.admissions.common.values;
 import com.team360.hms.admissions.common.exceptions.ValueFormatException;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hazlewood.connor.bottema.emailaddress.EmailAddressValidator;
 
 @Slf4j

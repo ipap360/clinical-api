@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.ServerProperties;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 @Slf4j
 public class WebServerManager {
@@ -15,42 +15,31 @@ public class WebServerManager {
     private static WebServerManager instance;
 
     @Getter
-    private WebServerConfig config;
+    private WebConfig conf;
 
     private HttpServer server;
 
-    private WebServerManager(WebServerConfig config) {
-
-        this.config = config;
+    private WebServerManager(ResourceConfig rc, WebConfig conf) throws URISyntaxException {
 
         if (server != null) {
             return;
         }
 
-        // try {
-        final ResourceConfig rc = new ResourceConfig()
-//                .packages("com.team360.hms.web.filters")
-                .packages(getConfig().getEndpoints())
-                //	.register(new LoggingFeature(Logger.getLogger(LoggingFeature.DEFAULT_LOGGER_NAME),
-                //			LoggingFeature.Verbosity.PAYLOAD_ANY))
-                //	.register(UsersEndpoint.class)
-                //	.register(RegistrationsEndpoint.class)
+        this.conf = conf;
 
-//                .register(RuntimeExceptionMapper.class)
-//                .register(GenericExceptionMapper.class)
-                .property(ServerProperties.METAINF_SERVICES_LOOKUP_DISABLE, true);
+        URI uri = conf.getBaseURI();
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI
-        server = GrizzlyHttpServerFactory.createHttpServer(URI.create(getConfig().getBaseURI()), rc);
-        log.debug(String.format("Jersey app started with WADL available at " + "%s/application.wadl", getConfig().getBaseURI()));
+        server = GrizzlyHttpServerFactory.createHttpServer(uri, rc);
+        log.info(String.format("Jersey app started with WADL available at " + "%s/application.wadl", uri));
         //} catch (Exception e) {
         //	log.error("An error occured while trying to start the HTTP server!", e);
         //}
     }
 
-    public static void start(WebServerConfig config) {
-        instance = new WebServerManager(config);
+    public static void start(ResourceConfig rc, WebConfig conf) throws URISyntaxException {
+        instance = new WebServerManager(rc, conf);
     }
 
     public static void stop() {
@@ -58,8 +47,8 @@ public class WebServerManager {
         instance = null;
     }
 
-    public static WebServerConfig get() {
-        return instance.getConfig();
+    public static WebConfig get() {
+        return instance.getConf();
     }
 
     public void destroy() {

@@ -4,9 +4,12 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+
 @Value
 @Builder
-public class WebServerConfig {
+public class WebConfig {
 
     @NonNull
     private String protocol;
@@ -19,9 +22,6 @@ public class WebServerConfig {
 
     @NonNull
     private String context;
-
-    @NonNull
-    private String endpoints;
 
     @NonNull
     private String secret;
@@ -53,8 +53,8 @@ public class WebServerConfig {
     @Builder.Default
     private Integer refreshTokenLength = 80;
 
-    public String getBaseURI() {
-        return getProtocol() + "://" + getDomain() + ":" + getPort() + getContext();
+    public URI getBaseURI() throws URISyntaxException {
+        return new URI(getProtocol() + "://" + getDomain() + ":" + getPort() + getContext());
     }
 
 }

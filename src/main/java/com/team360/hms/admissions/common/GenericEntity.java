@@ -1,8 +1,8 @@
 package com.team360.hms.admissions.common;
 
-import com.team360.hms.admissions.common.values.Credentials;
 import com.team360.hms.admissions.db.DBEntity;
 import com.team360.hms.admissions.db.DBEntityField;
+import com.team360.hms.admissions.db.DBUser;
 import lombok.Data;
 
 import java.time.Instant;
@@ -35,17 +35,17 @@ public abstract class GenericEntity implements DBEntity {
         return this;
     }
 
-    public DBEntity initialize (Integer id, Credentials credentials) {
+    public DBEntity initialize(Integer id, DBUser user) {
         setId(id);
-        createUserId = credentials.getValue();
-        modifyUserId = credentials.getValue();
+        createUserId = user.getId();
+        modifyUserId = user.getId();
         createdAt = Instant.now();
         modifiedAt = Instant.now();
         return this;
     }
 
-    public DBEntity markModified (Credentials credentials) {
-        modifyUserId = credentials.getValue();
+    public DBEntity markModified(DBUser user) {
+        modifyUserId = user.getId();
         modifiedAt = Instant.now();
         return this;
     }

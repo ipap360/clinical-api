@@ -1,0 +1,3 @@
+https://stackoverflow.com/questions/10935135/maven-and-adding-jars-to-system-scope
+
+https://stackoverflow.com/questions/4955635/how-to-add-local-jar-files-to-a-maven-project

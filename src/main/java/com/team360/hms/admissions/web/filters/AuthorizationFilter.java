@@ -9,44 +9,22 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.ext.Provider;
 
+//import javax.inject.Inject;
+
 @Slf4j
-@Secured
+//@Secured
 @Provider
 @Priority(Priorities.AUTHORIZATION)
 public class AuthorizationFilter implements ContainerRequestFilter, IFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        AccessToken accessToken = (AccessToken) requestContext.getProperty(JWT_PROP);
-
-//        requestContext.setSecurityContext(new SecurityContext() {
-//            @Override
-//            public Principal getUserPrincipal() {
-//                return new Principal() {
-//                    @Override
-//                    public String getName() {
-//                        return String.valueOf(accessToken.getUserId());
-//                    }
-//                };
-//            }
-//
-//            @Override
-//            public boolean isUserInRole(String s) {
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean isSecure() {
-//                return false;
-//            }
-//
-//            @Override
-//            public String getAuthenticationScheme() {
-//                return null;
-//            }
-//        });
-
-        requestContext.getHeaders().add(USER_ID_HEADER, String.valueOf(accessToken.getUserId()));
+        Integer userId = 0;
+        Object accessToken = requestContext.getProperty(JWT_PROP);
+        if (accessToken instanceof AccessToken) {
+            userId = ((AccessToken) accessToken).getUserId();
+        }
+        requestContext.setProperty("userId", userId);
     }
 
 }
