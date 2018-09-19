@@ -1,1 +1,1 @@
-# hms-admissions-plan-api
+# his-admissions-plan-api
