@@ -37,7 +37,8 @@ public class SessionEndpoint {
     @GET
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response get(@QueryParam("uuid") String uuid) {
+    @Path("/{uuid}")
+    public Response get(@PathParam("uuid") String uuid) {
         return Response.ok().entity(new SessionDetails().load((new SessionDao()).findByUuidAndUserId(uuid, WebUtl.getUser(crc)))).build();
     }
 
