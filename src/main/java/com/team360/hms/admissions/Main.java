@@ -6,11 +6,12 @@ import com.team360.hms.admissions.web.MyObjectMapperProvider;
 import com.team360.hms.admissions.web.WebConfig;
 import com.team360.hms.admissions.web.WebServerManager;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
-@Log4j2
+@Slf4j
 public class Main {
 
     public static final String SQL_TYPE = "SQL_TYPE";
