@@ -11,14 +11,11 @@ import java.net.URISyntaxException;
 @Builder
 public class WebConfig {
 
-    @NonNull
-    private String protocol;
+    @Builder.Default
+    private boolean isSecure = false;
 
     @NonNull
-    private String port;
-
-    @NonNull
-    private String domain;
+    private String uri;
 
     @NonNull
     private String context;
@@ -52,9 +49,5 @@ public class WebConfig {
 
     @Builder.Default
     private Integer refreshTokenLength = 80;
-
-    public URI getBaseURI() throws URISyntaxException {
-        return new URI(getProtocol() + "://" + getDomain() + ":" + getPort() + getContext());
-    }
 
 }

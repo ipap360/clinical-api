@@ -1,6 +1,4 @@
-package com.team360.hms.admissions.common.utils;
-
-import com.team360.hms.admissions.common.exceptions.AuthenticatedEncryptionException;
+package com.team360.hms.admissions.db;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
@@ -29,7 +27,7 @@ import java.security.SecureRandom;
  * @since 18.12.2017
  */
 @SuppressWarnings("WeakerAccess")
-final class AesGcmEncryption {
+public final class AesGcmEncryption {
 
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int TAG_LENGTH_BIT = 128;

@@ -1,4 +1,4 @@
-package com.team360.hms.admissions.common.exceptions;
+package com.team360.hms.admissions.db;
 
 /**
  * Thrown during the process of {@link AuthenticatedEncryptionException}

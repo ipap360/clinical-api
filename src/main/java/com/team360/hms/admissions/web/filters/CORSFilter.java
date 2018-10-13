@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
-@Provider
-@PreMatching
+//@Provider
+//@PreMatching
 public class CORSFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";

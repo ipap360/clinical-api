@@ -27,7 +27,7 @@ public class WebServerManager {
 
         this.conf = conf;
 
-        URI uri = conf.getBaseURI();
+        URI uri = new URI(conf.getUri());
 
         // create and start a new instance of grizzly http server
         // exposing the Jersey application at BASE_URI

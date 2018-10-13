@@ -35,7 +35,7 @@ public class WebCookie {
                 WebServerManager.get().getDomainName(),
                 null,
                 expiry,
-                "https".equals(WebServerManager.get().getProtocol()),
+                WebServerManager.get().isSecure(),
                 httpOnly);
     }
 
