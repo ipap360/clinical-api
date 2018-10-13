@@ -2,8 +2,8 @@
 # Project specific excludes
 #
 
-db
-rabbit
+/db
+/rabbit
 .env
 debug.log
 error.log
