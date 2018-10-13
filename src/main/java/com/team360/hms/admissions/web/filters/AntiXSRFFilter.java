@@ -22,7 +22,7 @@ public class AntiXSRFFilter implements ContainerRequestFilter, IFilter {
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         Map<String, Cookie> cookies = requestContext.getCookies();
-        Cookie accessCookie = cookies.get(ACCESS_TOKEN_COOKIE_NAME);
+        Cookie accessCookie = cookies.get(WebServerManager.get().getAccessTokenCookie());
 
         if (accessCookie == null) {
             return;

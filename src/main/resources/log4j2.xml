@@ -21,7 +21,7 @@
         </File>
     </Appenders>
     <Loggers>
-        <Root level="debug">
+        <Root level="${env:LOG_LEVEL:-DEBUG}">
             <AppenderRef ref="ErrorFile"/>
             <AppenderRef ref="Console"/>
             <AppenderRef ref="DebugFile"/>
