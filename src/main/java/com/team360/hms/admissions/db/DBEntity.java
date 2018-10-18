@@ -36,10 +36,11 @@ public interface DBEntity {
                 try {
                     field.setAccessible(true);
                     boolean isEnum = field.getType().isEnum();
-                    if (isEnum) {
-                        field.set(this, Enum.valueOf(field.getType().asSubclass(Enum.class), (String) map.get(F.name())));
+                    Object value = map.get(F.name());
+                    if (isEnum && value != null) {
+                        field.set(this, Enum.valueOf(field.getType().asSubclass(Enum.class), (String) value));
                     } else {
-                        field.set(this, map.get(F.name()));
+                        field.set(this, value);
                     }
 
                 } catch (IllegalAccessException e) {
@@ -67,23 +68,23 @@ public interface DBEntity {
 
         Arrays.stream(fields).forEach(field -> {
             if (field.isAnnotationPresent(DBEntityField.class)) {
-                DBEntityField F = field.getAnnotation(DBEntityField.class);
-                boolean isString = field.getType().isAssignableFrom(String.class);
-                String fullName = getTable().getName() + "." + F.name().toUpperCase();
-                boolean isEncrypted = encrypted.contains(fullName);
                 try {
+                    DBEntityField F = field.getAnnotation(DBEntityField.class);
+                    boolean isString = field.getType().isAssignableFrom(String.class);
+                    String fullName = getTable().getName() + "." + F.name().toUpperCase();
+                    boolean isEncrypted = encrypted.contains(fullName);
                     field.setAccessible(true);
-                    if (isString && isEncrypted && encKey != null) {
-                        String value = (String) field.get(this);
+                    Object value = field.get(this);
+                    if (isString && value != null && isEncrypted && encKey != null) {
                         try {
-                            map.put(F.name(), Base64.getEncoder().encodeToString(AES_GCM.encrypt(encKey.getBytes(), value.getBytes(), null)));
+                            map.put(F.name(), Base64.getEncoder().encodeToString(AES_GCM.encrypt(encKey.getBytes(), ((String) value).getBytes(), null)));
                         } catch (AuthenticatedEncryptionException e) {
                             e.printStackTrace();
                         }
                     } else {
-                        map.put(F.name(), field.get(this));
+                        map.put(F.name(), value);
                     }
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

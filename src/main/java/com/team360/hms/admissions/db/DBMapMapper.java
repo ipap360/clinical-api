@@ -78,8 +78,8 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                                                 null
                                         )
                                 );
-                            } catch (AuthenticatedEncryptionException e) {
-                                e.printStackTrace();
+                            } catch (AuthenticatedEncryptionException | IllegalArgumentException e) {
+                                log.debug(e.getMessage(), e);
                             }
                         }
                         row.put(name, value);

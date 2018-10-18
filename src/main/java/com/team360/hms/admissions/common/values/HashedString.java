@@ -2,30 +2,25 @@ package com.team360.hms.admissions.common.values;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import de.mkammerer.argon2.Argon2Helper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @ToString
 @EqualsAndHashCode
+@Slf4j
 public class HashedString {
 
-    // private static final int MSECS = 1000;
-
-    private static final int MEMORY = 65536;
+    private static final int MEMORY = 128000;
     private static final int PARALLELISM = 4;
     private static final int ITERATIONS = 40;
 
     private static final Argon2 argon2 = Argon2Factory.create();
-
-//    private static int ITERATIONS = Argon2Helper.findIterations(argon2, MSECS, MEMORY, PARALLELISM);
-//
-//    static {
-//        if (ITERATIONS <= 3) {
-//            ITERATIONS = 4;
-//        }
-//        log.info("Argon2: " + ITERATIONS);
-//    }
 
     @Getter
     private String value;

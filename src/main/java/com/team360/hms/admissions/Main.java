@@ -22,7 +22,7 @@ public class Main {
     private static final String DEFAULT_LOG_LEVEL = "DEBUG";
 
     public static final String BUILD_MODE = "BUILD_MODE";
-    public static final String LOG_LEVEL = "BUILD_MODE";
+    public static final String LOG_LEVEL = "LOG_LEVEL";
 
     private static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
 
@@ -41,7 +41,7 @@ public class Main {
     private static final String DEFAULT_IS_SECURE = "false";
     private static final String DEFAULT_URI = "http://0.0.0.0:8080";
     private static final String DEFAULT_DOMAIN_NAME = "localhost";
-    private static final String DEFAULT_CONTEXT = "/api";
+    private static final String DEFAULT_CONTEXT = "";
 
     private static final String DEFAULT_ACCESS_TIMEOUT = String.valueOf(20 * 60);
     private static final String DEFAULT_REFRESH_TIMEOUT = String.valueOf(7 * 24 * 60 * 60);
@@ -62,6 +62,7 @@ public class Main {
     public static final String REFRESH_CLIENT_COOKIE = "REFRESH_CLIENT_COOKIE";
 
     public static final String SIGNATURE_KEY = "SIGNATURE_KEY";
+    public static final String ADMIN = "ADMIN";
 
     public static final boolean DEBUG_MODE = java.lang.management.ManagementFactory.getRuntimeMXBean().
             getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
@@ -116,6 +117,7 @@ public class Main {
 
             List<String> encrypted = new ArrayList();
             encrypted.add("PATIENTS.NOTES");
+            encrypted.add("CALENDAR_EVENTS.NOTES");
 
             DBManagerConfig db = DBManagerConfig.builder()
                     .properties(props)
@@ -137,6 +139,7 @@ public class Main {
                     .domainName(opts.get(DOMAIN_NAME))
                     .context(opts.get(API_CONTEXT))
                     .secret(opts.get(SIGNATURE_KEY))
+                    .admin(opts.get(ADMIN))
                     .accessTokenTimeout(Integer.valueOf(opts.get(ACCESS_TIMEOUT)))
                     .refreshTokenTimeout(Integer.valueOf(opts.get(REFRESH_TIMEOUT)))
                     .accessTokenCookie(opts.get(ACCESS_COOKIE))
