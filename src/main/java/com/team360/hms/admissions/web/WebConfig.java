@@ -50,4 +50,6 @@ public class WebConfig {
     @Builder.Default
     private Integer refreshTokenLength = 80;
 
+    private String admin;
+
 }

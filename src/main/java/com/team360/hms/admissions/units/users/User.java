@@ -1,15 +1,15 @@
 package com.team360.hms.admissions.units.users;
 
-import com.team360.hms.admissions.db.DBEntityMeta;
 import com.team360.hms.admissions.common.GenericEntity;
 import com.team360.hms.admissions.db.DBEntityField;
+import com.team360.hms.admissions.db.DBEntityMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @DBEntityMeta(name = "USERS", label = "User")
 public class User extends GenericEntity {
 
@@ -23,15 +23,25 @@ public class User extends GenericEntity {
     private String password;
 
     @DBEntityField(name = "LANGUAGE")
-    private String language;
+    private String language = "en-US";
 
     @DBEntityField(name = "LOCALE")
-    private String locale;
+    private String locale = "en-US";
 
     @DBEntityField(name = "TIMEZONE")
-    private String timezone;
+    private String timezone = "UTC";
 
     @DBEntityField(name = "REGISTRATION_ID")
     private Integer registrationId;
+
+
+    public User load(UserForm form) {
+        setUsername(form.getUsername());
+        setPassword(form.getPassword());
+        setTimezone(form.getTimezone());
+        setLocale(form.getLocale());
+        setLanguage(form.getLocale());
+        return this;
+    }
 
 }
