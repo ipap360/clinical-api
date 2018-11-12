@@ -48,12 +48,11 @@ public class CalendarEventsEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, CalendarEventForm form) {
-        form.validate(id);
+        form.setId(id);
+        form.validate();
         CalendarEvent event = new CalendarEvent();
-        event.setId(id);
-        event.load(form);
-        WebUtl.db(crc).upsert(event);
-        return Response.ok().build();
+        WebUtl.db(crc).upsert(event.load(form));
+        return Response.ok().entity(form.load(event)).build();
     }
 
     @POST

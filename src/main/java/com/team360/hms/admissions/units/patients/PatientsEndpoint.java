@@ -39,11 +39,11 @@ public class PatientsEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, PatientForm form) {
-        form.validate(id);
+        form.setId(id);
+        form.validate();
         Patient patient = new Patient();
-        patient.setId(id);
         WebUtl.db(crc).upsert(patient.load(form));
-        return Response.ok().build();
+        return Response.ok().entity(form.load(patient)).build();
     }
 
 

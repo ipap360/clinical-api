@@ -9,6 +9,8 @@ import java.util.HashMap;
 @Data
 public class UserForm {
 
+    private Integer id;
+
     private String username;
 
     private String password;
@@ -17,7 +19,7 @@ public class UserForm {
 
     private String timezone;
 
-    UserForm validate(int id) {
+    UserForm validate() {
         HashMap<String, String> errors = new HashMap();
 
         if (getUsername() == null) {

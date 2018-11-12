@@ -44,7 +44,7 @@ public class UsersEndpoint {
             throw new DomainException("You do not have adequate permissions to perform this action");
         }
 
-        form.validate(0);
+        form.validate();
 
         Optional<Integer> id = UserDao.findByUsername(form.getUsername());
         if (id.isPresent()) {

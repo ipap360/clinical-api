@@ -37,6 +37,7 @@ public class Patient extends GenericEntity {
 
     public Patient load (PatientForm form) {
 
+        setId(form.getId());
         setName(form.getName());
         setCode(form.getCode());
         setNotes(form.getNotes());

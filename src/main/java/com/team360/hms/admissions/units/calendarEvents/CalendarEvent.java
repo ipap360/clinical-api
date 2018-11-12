@@ -44,6 +44,7 @@ public class CalendarEvent extends GenericEntity implements Cloneable {
     }
 
     public CalendarEvent load(CalendarEventForm form) {
+        setId(form.getId());
         setPatientId(form.getPatient());
         setNotes(form.getNotes());
         setAdmissionDate(form.getDate());

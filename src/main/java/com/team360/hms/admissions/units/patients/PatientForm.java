@@ -8,6 +8,8 @@ import java.util.HashMap;
 @Data
 public class PatientForm {
 
+    private Integer id;
+
     private String name;
 
     private String code;
@@ -18,7 +20,7 @@ public class PatientForm {
 
     private Gender gender;
 
-    PatientForm validate(int id) {
+    PatientForm validate() {
         HashMap<String, String> errors = new HashMap();
         if (getName() == null) {
             errors.put("name", "Please fill the name");
@@ -31,6 +33,7 @@ public class PatientForm {
 
     PatientForm load(Patient patient) {
 
+        setId(patient.getId());
         setName(patient.getName());
         setCode(patient.getCode());
         setNotes(patient.getNotes());

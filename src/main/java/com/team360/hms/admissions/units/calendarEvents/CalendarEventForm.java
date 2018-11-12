@@ -9,6 +9,8 @@ import java.util.HashMap;
 @Data
 public class CalendarEventForm {
 
+    private Integer id;
+
     private Integer patient;
 
     private LocalDate date;
@@ -18,6 +20,7 @@ public class CalendarEventForm {
     private String notes;
 
     CalendarEventForm load(CalendarEvent event) {
+        setId(event.getId());
         setPatient(event.getPatientId());
         setDate(event.getAdmissionDate());
         setDuration(event.getDuration());
@@ -25,7 +28,7 @@ public class CalendarEventForm {
         return this;
     }
 
-    CalendarEventForm validate(Integer id) {
+    CalendarEventForm validate() {
         HashMap errors = new HashMap();
         if (getPatient() == null) {
             errors.put("patient", "Please select a patient");
