@@ -78,7 +78,7 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                                                 null
                                         )
                                 );
-                            } catch (AuthenticatedEncryptionException | IllegalArgumentException e) {
+                            } catch (Exception e) {
                                 log.debug(e.getMessage(), e);
                             }
                         }
