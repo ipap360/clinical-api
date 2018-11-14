@@ -90,6 +90,7 @@ public class CalendarEventsEndpoint {
 
         event2.setAdmissionDate(form.getDate());
         event2.setReleaseDate(form.getDate().plusDays(event1.getDuration()));
+        event2.setNotes(form.getNotes());
 
         if ("postpone".equalsIgnoreCase(mode)) {
             event1.setIsPostponed(true);
@@ -97,7 +98,6 @@ public class CalendarEventsEndpoint {
         } else {
             event1.setIsCopied(true);
             event1.setIsCompleted(true);
-            event2.setNotes(form.getNotes());
         }
 
         WebUtl.db(crc).upsert(event1, event2);
