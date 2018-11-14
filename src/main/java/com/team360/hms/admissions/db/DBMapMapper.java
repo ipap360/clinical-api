@@ -2,6 +2,7 @@ package com.team360.hms.admissions.db;
 
 import com.google.common.base.CaseFormat;
 import com.team360.hms.admissions.common.utils.DateUtils;
+import liquibase.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -69,7 +70,7 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                     case Types.CLOB:
                     case Types.NCLOB:
                         String value = rs.getString(i);
-                        if (isEncrypted(m, i)) {
+                        if (isEncrypted(m, i) && StringUtils.isNotEmpty(value)) {
                             try {
                                 value = new String(
                                         AES_GCM.decrypt(
