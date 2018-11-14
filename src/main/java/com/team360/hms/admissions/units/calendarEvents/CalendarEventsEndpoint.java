@@ -80,14 +80,14 @@ public class CalendarEventsEndpoint {
     }
 
     private CalendarEvent copyOrPostpone(String mode, Integer id, CalendarEventCopyForm form) {
-
+        form.validate();
         CalendarEvent event1 = new CalendarEvent();
         event1.setId(id);
         WebUtl.db(crc).read(event1);
 
         CalendarEvent event2 = new CalendarEvent();
         event2.setPatientId(event1.getPatientId());
-        event2.setNotes(form.getNotes());
+
         event2.setAdmissionDate(form.getDate());
         event2.setReleaseDate(form.getDate().plusDays(event1.getDuration()));
 
@@ -97,6 +97,7 @@ public class CalendarEventsEndpoint {
         } else {
             event1.setIsCopied(true);
             event1.setIsCompleted(true);
+            event2.setNotes(form.getNotes());
         }
 
         WebUtl.db(crc).upsert(event1, event2);

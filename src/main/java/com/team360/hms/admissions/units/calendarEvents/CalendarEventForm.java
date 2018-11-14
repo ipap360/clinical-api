@@ -19,12 +19,21 @@ public class CalendarEventForm {
 
     private String notes;
 
+    private Boolean isPostponed;
+
+    private Boolean isCopied;
+
+    private Integer postponeId;
+
     CalendarEventForm load(CalendarEvent event) {
         setId(event.getId());
         setPatient(event.getPatientId());
         setDate(event.getAdmissionDate());
         setDuration(event.getDuration());
         setNotes(event.getNotes());
+        setIsPostponed(event.getIsPostponed());
+        setIsCopied(event.getIsCopied());
+        setPostponeId(event.getPostponeId());
         return this;
     }
 
