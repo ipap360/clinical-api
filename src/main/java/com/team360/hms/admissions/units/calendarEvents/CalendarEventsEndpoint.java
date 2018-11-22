@@ -41,7 +41,7 @@ public class CalendarEventsEndpoint {
         CalendarEvent event = new CalendarEvent();
         WebUtl.db(crc).read(event.setId(id));
         CalendarEventForm form = new CalendarEventForm();
-        return Response.ok().entity(form.load(event)).build();
+        return Response.ok().entity(form.load(event, getOriginalEvent(event))).build();
     }
 
     @POST
@@ -52,7 +52,7 @@ public class CalendarEventsEndpoint {
         form.validate();
         CalendarEvent event = new CalendarEvent();
         WebUtl.db(crc).upsert(event.load(form));
-        return Response.ok().entity(form.load(event)).build();
+        return Response.ok().entity(form.load(event, getOriginalEvent(event))).build();
     }
 
     @POST
@@ -79,11 +79,20 @@ public class CalendarEventsEndpoint {
         return Response.ok().entity(copyOrPostpone("COPY", id, form)).build();
     }
 
+    private CalendarEvent getOriginalEvent(CalendarEvent event) {
+        CalendarEvent originalEvent = null;
+        if (event.getPostponeId() != null && event.getPostponeId() != 0) {
+            originalEvent = new CalendarEvent();
+            WebUtl.db(crc).read(originalEvent.setId(event.getPostponeId()));
+        }
+        return originalEvent;
+    }
+
     private CalendarEvent copyOrPostpone(String mode, Integer id, CalendarEventCopyForm form) {
-        form.validate();
         CalendarEvent event1 = new CalendarEvent();
         event1.setId(id);
         WebUtl.db(crc).read(event1);
+        form.validate(event1);
 
         CalendarEvent event2 = new CalendarEvent();
         event2.setPatientId(event1.getPatientId());

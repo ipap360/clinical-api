@@ -13,10 +13,13 @@ public class CalendarEventCopyForm {
 
     private String notes;
 
-    CalendarEventCopyForm validate() {
+    CalendarEventCopyForm validate(CalendarEvent previous) {
         HashMap errors = new HashMap();
         if (getDate() == null) {
             errors.put("date", "Please select a valid date");
+        }
+        if (!getDate().isAfter(previous.getAdmissionDate())) {
+            errors.put("date", "Please select a date after the original appointment date");
         }
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);

@@ -15,7 +15,7 @@ public class CalendarEventForm {
 
     private LocalDate date;
 
-    private Integer duration;
+    private Integer duration = 0;
 
     private String notes;
 
@@ -25,7 +25,9 @@ public class CalendarEventForm {
 
     private Integer postponeId;
 
-    CalendarEventForm load(CalendarEvent event) {
+    private LocalDate originalDate;
+
+    CalendarEventForm load(CalendarEvent event, CalendarEvent originalEvent) {
         setId(event.getId());
         setPatient(event.getPatientId());
         setDate(event.getAdmissionDate());
@@ -33,7 +35,10 @@ public class CalendarEventForm {
         setNotes(event.getNotes());
         setIsPostponed(event.getIsPostponed());
         setIsCopied(event.getIsCopied());
-        setPostponeId(event.getPostponeId());
+        if (originalEvent != null) {
+            setPostponeId(originalEvent.getId());
+            setOriginalDate(originalEvent.getAdmissionDate());
+        }
         return this;
     }
 
