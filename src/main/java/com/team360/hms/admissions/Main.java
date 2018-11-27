@@ -117,7 +117,7 @@ public class Main {
 
             List<String> encrypted = new ArrayList();
             encrypted.add("PATIENTS.NOTES");
-            encrypted.add("CALENDAR_EVENTS.NOTES");
+            encrypted.add("ADMISSIONS.NOTES");
 
             DBManagerConfig db = DBManagerConfig.builder()
                     .properties(props)

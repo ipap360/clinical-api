@@ -97,7 +97,7 @@ public interface DBEntity {
 
     DBEntity setId(Integer id);
 
-    DBEntity initialize(Integer id, DBUser user);
+    DBEntity initialize(DBUser user);
 
     DBEntity markModified(DBUser user);
 

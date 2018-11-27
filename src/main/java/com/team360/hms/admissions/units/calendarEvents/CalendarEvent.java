@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper=true)
-@DBEntityMeta(name = "CALENDAR_EVENTS", label = "Event")
+@DBEntityMeta(name = "ADMISSIONS", label = "Event")
 public class CalendarEvent extends GenericEntity implements Cloneable {
 
     @DBEntityField(name = "NOTES")

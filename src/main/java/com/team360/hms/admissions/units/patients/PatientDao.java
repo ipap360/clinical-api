@@ -10,10 +10,12 @@ import java.util.Map;
 public class PatientDao {
 
     public List<Map<String, Object>> list() {
-        final String sql = "SELECT * FROM PATIENTS";
+        final String sql = "SELECT * FROM PATIENTS ORDER BY NAME ASC";
         return DB.get().withHandle(db -> db.createQuery(sql)
                 .map(new DBMapMapper(CaseFormat.LOWER_CAMEL))
                 .list());
     }
+
+
 
 }

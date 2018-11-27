@@ -60,6 +60,11 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                 if (this.format != null) {
                     name = DB.format().to(this.format, name);
                 }
+                Object test = rs.getObject(i);
+                if (test == null) {
+                    row.put(name, test);
+                    continue;
+                }
                 switch (type) {
                     case Types.VARCHAR:
                     case Types.LONGNVARCHAR:

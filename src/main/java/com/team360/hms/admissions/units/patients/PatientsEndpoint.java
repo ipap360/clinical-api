@@ -1,8 +1,10 @@
 package com.team360.hms.admissions.units.patients;
 
+import com.team360.hms.admissions.db.DBEntity;
 import com.team360.hms.admissions.units.WebUtl;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
+import org.jdbi.v3.core.Handle;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -53,7 +55,12 @@ public class PatientsEndpoint {
     public Response delete(@PathParam("id") Integer id) {
         Patient patient = new Patient();
         patient.setId(id);
-        WebUtl.db(crc).delete(patient);
+        WebUtl.db(crc).delete((Handle db, DBEntity entity) -> {
+            db.createUpdate("DELETE FROM ADMISSIONS WHERE PATIENT_ID = :PATIENT_ID")
+                    .bind("PATIENT_ID", entity.getId())
+                    .execute();
+            return true;
+        }, patient);
         return Response.ok().build();
     }
 
