@@ -1,13 +1,11 @@
-package com.team360.hms.admissions.units.roomAvailability;
+package com.team360.hms.admissions.units.rooms;
 
+import com.team360.hms.admissions.units.WebUtl;
 import com.team360.hms.admissions.units.patients.Gender;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -21,8 +19,8 @@ import java.util.Map;
 @Secured
 @Log4j2
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-@Path("room-availability")
-public class RoomAvailabilityEndpoint {
+@Path("rooms")
+public class RoomsEndpoint {
 
     private static final int BEDS_PER_ROOM = 6;
     private static final int TOTAL_ROOMS = 3;
@@ -33,6 +31,44 @@ public class RoomAvailabilityEndpoint {
     ContainerRequestContext crc;
 
     @GET
+    public Response get() {
+        return Response.ok().entity(new RoomDao().list()).build();
+    }
+
+    @GET
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response view(@PathParam("id") Integer id) {
+        Room room = new Room();
+        WebUtl.db(crc).read(room.setId(id));
+        RoomForm form = new RoomForm();
+        return Response.ok().entity(form.load(room)).build();
+    }
+
+    @POST
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response upsert(@PathParam("id") Integer id, RoomForm form) {
+        form.setId(id);
+        form.validate();
+        Room room = new Room();
+        WebUtl.db(crc).upsert(room.load(form));
+        return Response.ok().entity(form.load(room)).build();
+    }
+
+
+    @POST
+    @Path("/{id}/delete")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response delete(@PathParam("id") Integer id) {
+        Room room = new Room();
+        room.setId(id);
+        WebUtl.db(crc).delete(room);
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/availability")
     public Response get(
             @QueryParam("from") String from,
             @QueryParam("to") String to
@@ -49,7 +85,7 @@ public class RoomAvailabilityEndpoint {
                 days.put(d, new RoomAvailability());
             }
 
-            List<Map<String, Object>> map = new RoomAvailabilityDao().list(d1, d2);
+            List<Map<String, Object>> map = new RoomDao().admissionsPerGenderPerDate(d1, d2);
             map.forEach((v) -> {
 
                 // todo: check what is going on with the case

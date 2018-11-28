@@ -91,6 +91,7 @@
             <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="NAME" type="varchar(255)"/>
             <column name="CAPACITY" type="int"/>
             <column name="CREATE_USER_ID" type="int"/>
             <column name="MODIFY_USER_ID" type="int"/>

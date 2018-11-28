@@ -1,4 +1,4 @@
-package com.team360.hms.admissions.units.roomAvailability;
+package com.team360.hms.admissions.units.rooms;
 
 import lombok.Data;
 
