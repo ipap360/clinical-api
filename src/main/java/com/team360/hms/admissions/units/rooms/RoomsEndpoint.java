@@ -12,9 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Secured
 @Log4j2
@@ -85,9 +83,10 @@ public class RoomsEndpoint {
                 days.put(d, new RoomAvailability());
             }
 
+            List<Integer> rooms = new RoomDao().capacities();
+
             List<Map<String, Object>> map = new RoomDao().admissionsPerGenderPerDate(d1, d2);
             map.forEach((v) -> {
-
                 // todo: check what is going on with the case
                 LocalDate d = (LocalDate) v.get("ID");
                 int cnt = ((Long) v.get("CNT")).intValue();
@@ -103,23 +102,9 @@ public class RoomsEndpoint {
             });
 
             days.forEach((k, v) -> {
-
-                int f = v.getFemale();
-                int m = v.getMale();
-
-                int partF = (f % BEDS_PER_ROOM != 0) ? 1 : 0;
-                int partM = (m % BEDS_PER_ROOM != 0) ? 1 : 0;
-
-                int Frooms = f / BEDS_PER_ROOM + partF;
-                int Mrooms = m / BEDS_PER_ROOM + partM;
-
-                int free = (TOTAL_ROOMS - Frooms - Mrooms) * BEDS_PER_ROOM;
-
-                int freeF = BEDS_PER_ROOM * partF - f % BEDS_PER_ROOM + free;
-                int freeM = BEDS_PER_ROOM * partM - m % BEDS_PER_ROOM + free;
-
-                v.setF(getIndicator(freeF));
-                v.setM(getIndicator(freeM));
+                int[] free = freePerGender(rooms, v.getMale(), v.getFemale());
+                v.setF(getIndicator(free[1]));
+                v.setM(getIndicator(free[0]));
 
             });
 
@@ -127,6 +112,42 @@ public class RoomsEndpoint {
         } catch (DateTimeParseException e) {
             throw new RuntimeException("Please select a valid period");
         }
+    }
+
+    static int[] freePerGender(List<Integer> rooms, int m, int f) {
+        List<Integer> dailyRooms = new ArrayList(rooms);
+
+        int[] val = new int[]{m, f};
+        int[] remain = new int[]{0, 0};
+
+        while (val[0] > 0 || val[1] > 0) {
+            int i = (val[0] >= val[1]) ? 0 : 1;
+            int capacity = closest(dailyRooms, val[i]);
+            if (capacity <= 0) {
+                remain[0] = (val[0] > 0) ? -val[0] : remain[0];
+                remain[1] = (val[1] > 0) ? -val[1] : remain[1];
+                break;
+            }
+            val[i] = val[i] - capacity;
+            if (val[i] < 0) {
+                remain[i] = -val[i];
+                val[i] = 0;
+            }
+            int p = dailyRooms.indexOf(capacity);
+            dailyRooms.remove(p);
+        }
+
+        int free = dailyRooms.stream().mapToInt(Integer::intValue).sum();
+
+        remain[0] += free;
+        remain[1] += free;
+
+        return remain;
+    }
+
+    static int closest(List<Integer> list, Integer number) {
+        return list.stream()
+                .min(Comparator.comparingInt(i -> Math.abs(i - number))).orElse(0);
     }
 
     private String getIndicator(int free) {
