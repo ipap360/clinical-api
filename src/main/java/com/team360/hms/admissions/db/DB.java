@@ -158,7 +158,7 @@ public final class DB {
 
             @Override
             public void logAfterExecution(StatementContext context) {
-                log.debug("query: {}, params: {}, took {}ms", context.getRawSql(),  context.getBinding().toString(), context.getElapsedTime(ChronoUnit.MILLIS));
+                log.debug("query: {}, params: {}, took {}ms", context.getRawSql(), context.getBinding().toString(), context.getElapsedTime(ChronoUnit.MILLIS));
             }
 
             @Override

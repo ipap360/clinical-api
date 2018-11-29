@@ -1,8 +1,8 @@
 package com.team360.hms.admissions.units.patients;
 
-import com.team360.hms.admissions.db.DBEntityMeta;
-import com.team360.hms.admissions.db.DBEntityField;
 import com.team360.hms.admissions.common.GenericEntity;
+import com.team360.hms.admissions.db.DBEntityField;
+import com.team360.hms.admissions.db.DBEntityMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.time.temporal.ChronoField;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @DBEntityMeta(name = "PATIENTS", label = "Patient")
 public class Patient extends GenericEntity {
 
@@ -35,7 +35,7 @@ public class Patient extends GenericEntity {
         return LocalDate.now().get(ChronoField.YEAR) - birthYear;
     }
 
-    public Patient load (PatientForm form) {
+    public Patient load(PatientForm form) {
 
         setId(form.getId());
         setName(form.getName());

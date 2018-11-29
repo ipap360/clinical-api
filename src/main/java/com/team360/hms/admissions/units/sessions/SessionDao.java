@@ -2,7 +2,6 @@ package com.team360.hms.admissions.units.sessions;
 
 import com.team360.hms.admissions.db.DB;
 import com.team360.hms.admissions.db.DBMapMapper;
-import org.jdbi.v3.core.Jdbi;
 
 import java.time.Instant;
 import java.util.Map;

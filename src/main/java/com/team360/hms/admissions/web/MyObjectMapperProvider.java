@@ -18,11 +18,6 @@ public class MyObjectMapperProvider implements ContextResolver<ObjectMapper> {
         defaultObjectMapper = createDefaultMapper();
     }
 
-    @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return defaultObjectMapper;
-    }
-
     private static ObjectMapper createDefaultMapper() {
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -42,6 +37,11 @@ public class MyObjectMapperProvider implements ContextResolver<ObjectMapper> {
 //        result.configure(Feature.INDENT_OUTPUT, true);
 
         return mapper;
+    }
+
+    @Override
+    public ObjectMapper getContext(Class<?> type) {
+        return defaultObjectMapper;
     }
 
 }

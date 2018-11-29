@@ -1,13 +1,13 @@
 package com.team360.hms.admissions.units.registration;
 
-import com.team360.hms.admissions.db.DBEntityMeta;
-import com.team360.hms.admissions.db.DBEntityField;
 import com.team360.hms.admissions.common.GenericEntity;
+import com.team360.hms.admissions.db.DBEntityField;
+import com.team360.hms.admissions.db.DBEntityMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @DBEntityMeta(name = "REGISTRATIONS", label = "Registration")
 public class Registration extends GenericEntity {
 

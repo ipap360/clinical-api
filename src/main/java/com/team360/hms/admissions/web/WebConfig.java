@@ -4,9 +4,6 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 @Value
 @Builder
 public class WebConfig {
