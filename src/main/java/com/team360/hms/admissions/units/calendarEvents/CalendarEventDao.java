@@ -14,7 +14,7 @@ public class CalendarEventDao {
     private static String LIST_SQL = "SELECT C.ID, C.NOTES AS EVENT_NOTES, C.ADMISSION_DATE, C.RELEASE_DATE, C.IS_POSTPONED, C.IS_COMPLETED, P.NAME, P.CODE, P.NOTES AS PATIENT_NOTES, P.GENDER FROM ADMISSIONS C INNER JOIN PATIENTS P ON P.ID = C.PATIENT_ID";
 
     public List<Map<String, Object>> listByDate(String from, String to) {
-        final String sql = LIST_SQL + " WHERE ADMISSION_DATE <= :TO_DATE AND RELEASE_DATE >= :FROM_DATE AND IS_POSTPONED IS NULL ORDER BY ADMISSION_DATE ASC, RELEASE_DATE ASC";
+        final String sql = LIST_SQL + " WHERE ADMISSION_DATE <= :TO_DATE AND RELEASE_DATE >= :FROM_DATE AND IS_POSTPONED IS NULL ORDER BY ADMISSION_DATE ASC, RELEASE_DATE DESC";
         return DB.get().withHandle(db -> db.createQuery(sql)
                 .bind("FROM_DATE", from)
                 .bind("TO_DATE", to)
