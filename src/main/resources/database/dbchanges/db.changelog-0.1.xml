@@ -3,7 +3,7 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet author="ipap" id="0" runOnChange="true">
+    <changeSet author="ipap" id="0">
         <comment>DB initialization!</comment>
         <createTable tableName="USERS">
             <column name="ID" type="int" autoIncrement="true">
@@ -98,15 +98,13 @@
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
-        <createTable tableName="PARAMETERS">
+        <createTable tableName="THRESHOLDS">
             <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="WARNING_THRESHOLD" type="int"/>
-            <column name="LIMITED_THRESHOLD" type="int"/>
-            <column name="WARNING_COLOR" type="varchar(20)"/>
-            <column name="LIMITED_COLOR" type="varchar(20)"/>
-            <column name="FULL_COLOR" type="varchar(20)"/>
+            <column name="DESCRIPTION" type="varchar(255)"/>
+            <column name="THRESHOLD" type="int"/>
+            <column name="INDICATOR" type="varchar(255)"/>
             <column name="CREATE_USER_ID" type="int"/>
             <column name="MODIFY_USER_ID" type="int"/>
             <column name="CREATED_AT" type="timestamp"/>
@@ -116,37 +114,37 @@
             <dropTable tableName="PATIENTS"/>
             <dropTable tableName="ADMISSIONS"/>
             <dropTable tableName="ROOMS"/>
-            <dropTable tableName="PARAMETERS"/>
+            <dropTable tableName="THRESHOLDS"/>
         </rollback>
     </changeSet>
     <changeSet author="ipap" id="2">
         <customChange class="com.team360.hms.admissions.data.PopulateDBDates"/>
     </changeSet>
-<!--    <changeSet author="ipap" id="3">
-        <createTable tableName="REGISTRATIONS" autoIncrement="true">
-            <column name="ID" type="int">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="EMAIL" type="varchar(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="PASSWORD" type="text"/>
-            <column name="STATUS" type="varchar(255)"/>
-            <column name="RETRIES" type="int"/>
-            <column name="IP" type="varchar(255)"/>
-            <column name="USER_AGENT" type="varchar(255)"/>
-            <column name="TOKEN" type="text"/>
-            <column name="LOCALE" type="varchar(255)"/>
-            <column name="TIMEZONE" type="varchar(255)"/>
-            <column name="CREATE_USER_ID" type="int"/>
-            <column name="MODIFY_USER_ID" type="int"/>
-            <column name="CREATED_AT" type="timestamp"/>
-            <column name="MODIFIED_AT" type="timestamp"/>
-        </createTable>
-        <rollback>
-            <dropTable tableName="REGISTRATIONS"/>
-        </rollback>
-    </changeSet>-->
+    <!--    <changeSet author="ipap" id="3">
+            <createTable tableName="REGISTRATIONS" autoIncrement="true">
+                <column description="ID" type="int">
+                    <constraints primaryKey="true" nullable="false"/>
+                </column>
+                <column description="EMAIL" type="varchar(255)">
+                    <constraints nullable="false"/>
+                </column>
+                <column description="PASSWORD" type="text"/>
+                <column description="STATUS" type="varchar(255)"/>
+                <column description="RETRIES" type="int"/>
+                <column description="IP" type="varchar(255)"/>
+                <column description="USER_AGENT" type="varchar(255)"/>
+                <column description="TOKEN" type="text"/>
+                <column description="LOCALE" type="varchar(255)"/>
+                <column description="TIMEZONE" type="varchar(255)"/>
+                <column description="CREATE_USER_ID" type="int"/>
+                <column description="MODIFY_USER_ID" type="int"/>
+                <column description="CREATED_AT" type="timestamp"/>
+                <column description="MODIFIED_AT" type="timestamp"/>
+            </createTable>
+            <rollback>
+                <dropTable tableName="REGISTRATIONS"/>
+            </rollback>
+        </changeSet>-->
     <!--    <changeSet author="ipap" id="3">
             <createView replaceIfExists="true"
                         viewName="CALENDAR_VIEW">
@@ -160,8 +158,8 @@
                          tableName="REGISTRATIONS"
                          tablespace=""
                          unique="false">
-                <column name="EMAIL" type="varchar(255)"/>
-                <column name="STATUS" type="int"/>
+                <column description="EMAIL" type="varchar(255)"/>
+                <column description="STATUS" type="int"/>
             </createIndex>
             <createIndex catalogName=""
                          indexName="USERNAME_IDX"
@@ -169,7 +167,7 @@
                          tableName="USERS"
                          tablespace=""
                          unique="true">
-                <column name="USERNAME" type="varchar(255)"/>
+                <column description="USERNAME" type="varchar(255)"/>
             </createIndex>
             <createIndex catalogName=""
                          indexName="USERID_IDX"
@@ -177,7 +175,7 @@
                          tableName="SESSIONS"
                          tablespace=""
                          unique="true">
-                <column name="USER_ID" type="int"/>
+                <column description="USER_ID" type="int"/>
             </createIndex>
             <createIndex catalogName=""
                          indexName="UUID_IDX"
@@ -185,7 +183,7 @@
                          tableName="SESSIONS"
                          tablespace=""
                          unique="true">
-                <column name="UUID" type="varchar(36)"/>
+                <column description="UUID" type="varchar(36)"/>
             </createIndex>
         </changeSet>-->
 </databaseChangeLog>
