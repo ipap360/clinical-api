@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Secured
 @Log4j2
@@ -76,6 +77,21 @@ public class RoomsEndpoint {
 
     }
 
+    static List<Integer> listSubSums(List<Integer> list) {
+        List<Integer> subSums = new ArrayList();
+        int n = list.size();
+        for (int i = 0; i < (1 << n); i++) {
+            int sum = 0;
+            for (int j = 0; j < n; j++) {
+                if ((i & (1 << j)) > 0) {
+                    sum += list.get(j);
+                }
+            }
+            subSums.add(sum);
+        }
+        return subSums;
+    }
+
     public Map<LocalDate, RoomAvailability> process(LocalDate d1, LocalDate d2) {
         try {
             Map<LocalDate, RoomAvailability> days = new HashMap();
@@ -84,6 +100,7 @@ public class RoomsEndpoint {
             }
 
             List<Integer> rooms = new RoomDao().capacities();
+            List<Integer> capacities = listSubSums(rooms).stream().distinct().collect(Collectors.toList());
 
             List<Map<String, Object>> map = new RoomDao().admissionsPerGenderPerDate(d1, d2);
             map.forEach((v) -> {
@@ -101,11 +118,12 @@ public class RoomsEndpoint {
                 }
             });
 
+            int total = rooms.stream().mapToInt(Integer::intValue).sum();
             days.forEach((k, v) -> {
-                int[] free = freePerGender(rooms, v.getMale(), v.getFemale());
-                v.setF(getIndicator(free[1]));
+                int[] free = freePerGender(capacities, total, v.getMale(), v.getFemale());
+//                int freeF = freePerGender(rooms, capacities, v.getFemale(), v.getMale());
                 v.setM(getIndicator(free[0]));
-
+                v.setF(getIndicator(free[1]));
             });
 
             return days;
@@ -114,40 +132,48 @@ public class RoomsEndpoint {
         }
     }
 
-    static int[] freePerGender(List<Integer> rooms, int m, int f) {
-        List<Integer> dailyRooms = new ArrayList(rooms);
+    static int[] freePerGender(List<Integer> capacities, int total, int M, int F) {
 
-        int[] val = new int[]{m, f};
-        int[] remain = new int[]{0, 0};
-
-        while (val[0] > 0 || val[1] > 0) {
-            int i = (val[0] >= val[1]) ? 0 : 1;
-            int capacity = closest(dailyRooms, val[i]);
-            if (capacity <= 0) {
-                remain[0] = (val[0] > 0) ? -val[0] : remain[0];
-                remain[1] = (val[1] > 0) ? -val[1] : remain[1];
-                break;
-            }
-            val[i] = val[i] - capacity;
-            if (val[i] < 0) {
-                remain[i] = -val[i];
-                val[i] = 0;
-            }
-            int p = dailyRooms.indexOf(capacity);
-            dailyRooms.remove(p);
+        if (total < M + F) {
+            return new int[]{0, 0};
         }
 
-        int free = dailyRooms.stream().mapToInt(Integer::intValue).sum();
+        int capM = bestFit(capacities, M);
+        int capF = bestFit(capacities, F);
 
-        remain[0] += free;
-        remain[1] += free;
+        int freeM, freeF;
 
-        return remain;
+        freeM = total - capF - M;
+        freeF = total - capM - F;
+
+        if (freeM >= 0 || freeF >= 0) {
+            return new int[]{freeM, freeF};
+        }
+
+        if (capM < capF) {
+            return new int[]{capM - M, 0};
+        }
+
+        if (capF < capM) {
+            return new int[]{capF - F, 0};
+        }
+
+        return new int[]{0, 0};
     }
 
-    static int closest(List<Integer> list, Integer number) {
+    static int bestFit(List<Integer> list, Integer number) {
+        int pick1 = list.stream().filter(i -> i >= number).min(Comparator.comparingInt(i -> i - number)).orElse(0);
+        return (pick1 > 0) ? pick1 : list.stream().filter(i -> i < number).max(Comparator.comparingInt(i -> i)).orElse(0);
+    }
+
+    static int min(List<Integer> list, Integer number) {
         return list.stream()
-                .min(Comparator.comparingInt(i -> Math.abs(i - number))).orElse(0);
+                .min(Comparator.comparingInt(i -> number)).orElse(0);
+    }
+
+    static int max(List<Integer> list, Integer number) {
+        return list.stream()
+                .max(Comparator.comparingInt(i -> number)).orElse(0);
     }
 
     private String getIndicator(int free) {
