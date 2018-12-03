@@ -15,7 +15,7 @@ public class CalendarEventForm {
 
     private LocalDate date;
 
-    private Integer duration = 0;
+    private Integer duration;
 
     private String notes;
 
@@ -49,6 +49,9 @@ public class CalendarEventForm {
         }
         if (getDate() == null) {
             errors.put("date", "Please select a valid date");
+        }
+        if (getDuration() == null) {
+            errors.put("duration", "Please select the duration");
         }
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
