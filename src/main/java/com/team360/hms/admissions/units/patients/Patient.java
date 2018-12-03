@@ -26,7 +26,7 @@ public class Patient extends GenericEntity {
     private String notes;
 
     @DBEntityField(name = "GENDER")
-    private Gender gender = Gender.UNKNOWN;
+    private Gender gender;
 
     @DBEntityField(name = "BIRTH_YEAR")
     private Integer birthYear;

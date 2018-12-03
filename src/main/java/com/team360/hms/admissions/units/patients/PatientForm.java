@@ -25,6 +25,9 @@ public class PatientForm {
         if (getName() == null) {
             errors.put("name", "Please fill the name");
         }
+        if (getGender() == null) {
+            errors.put("gender", "Please select the gender");
+        }
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
         }
