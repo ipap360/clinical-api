@@ -5,22 +5,11 @@ import lombok.Data;
 @Data
 public class RoomAvailability {
 
-    private Integer male;
+    private Integer male = 0;
+    private Integer female = 0;
 
-    private Integer female;
-
-    private String m;
-
-    private String f;
-
-    public RoomAvailability() {
-
-        male = 0;
-        female = 0;
-
-        m = "";
-        f = "";
-
-    }
+    private Integer M = 0;
+    private Integer F = 0;
+    private Integer Total = 0;
 
 }

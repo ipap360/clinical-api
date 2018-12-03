@@ -21,10 +21,7 @@ import java.util.stream.Collectors;
 @Path("rooms")
 public class RoomsEndpoint {
 
-    private static final int BEDS_PER_ROOM = 6;
-    private static final int TOTAL_ROOMS = 3;
-    private static final int LIMITED = 3;
-    private static final int WARNING = 7;
+    private static List<Integer> roomPartialSums;
 
     @Context
     ContainerRequestContext crc;
@@ -52,6 +49,7 @@ public class RoomsEndpoint {
         form.validate();
         Room room = new Room();
         WebUtl.db(crc).upsert(room.load(form));
+        maybeCalculatePartSums(true);
         return Response.ok().entity(form.load(room)).build();
     }
 
@@ -63,6 +61,7 @@ public class RoomsEndpoint {
         Room room = new Room();
         room.setId(id);
         WebUtl.db(crc).delete(room);
+        maybeCalculatePartSums(true);
         return Response.ok().build();
     }
 
@@ -75,6 +74,16 @@ public class RoomsEndpoint {
 
         return Response.ok().entity(process(LocalDate.parse(from), LocalDate.parse(to))).build();
 
+    }
+
+    static void maybeCalculatePartSums(boolean force) {
+        if (roomPartialSums != null && !force) {
+            return;
+        }
+
+        List<Integer> rooms = new RoomDao().capacities();
+        log.debug("Calculating sub sums of " + rooms.size() + " rooms...");
+        roomPartialSums = listSubSums(rooms).stream().distinct().collect(Collectors.toList());
     }
 
     static List<Integer> listSubSums(List<Integer> list) {
@@ -99,10 +108,11 @@ public class RoomsEndpoint {
                 days.put(d, new RoomAvailability());
             }
 
-            List<Integer> rooms = new RoomDao().capacities();
-            List<Integer> capacities = listSubSums(rooms).stream().distinct().collect(Collectors.toList());
+            RoomDao roomDao = new RoomDao();
+            List<Integer> rooms = roomDao.capacities();
+            maybeCalculatePartSums(false);
 
-            List<Map<String, Object>> map = new RoomDao().admissionsPerGenderPerDate(d1, d2);
+            List<Map<String, Object>> map = roomDao.admissionsPerGenderPerDate(d1, d2);
             map.forEach((v) -> {
                 // todo: check what is going on with the case
                 LocalDate d = (LocalDate) v.get("ID");
@@ -120,10 +130,10 @@ public class RoomsEndpoint {
 
             int total = rooms.stream().mapToInt(Integer::intValue).sum();
             days.forEach((k, v) -> {
-                int[] free = freePerGender(capacities, total, v.getMale(), v.getFemale());
-//                int freeF = freePerGender(rooms, capacities, v.getFemale(), v.getMale());
-                v.setM(getIndicator(free[0]));
-                v.setF(getIndicator(free[1]));
+                int[] free = freePerGender(roomPartialSums, total, v.getMale(), v.getFemale());
+                v.setM(free[0]);
+                v.setF(free[1]);
+                v.setTotal(total - v.getMale() - v.getFemale());
             });
 
             return days;
@@ -150,12 +160,12 @@ public class RoomsEndpoint {
             return new int[]{freeM, freeF};
         }
 
-        if (capM < capF) {
-            return new int[]{capM - M, 0};
+        if (M < F) {
+            return new int[]{capM - M + freeF, 0};
         }
 
-        if (capF < capM) {
-            return new int[]{capF - F, 0};
+        if (F < M) {
+            return new int[]{0, capF - F + freeM};
         }
 
         return new int[]{0, 0};
@@ -164,28 +174,6 @@ public class RoomsEndpoint {
     static int bestFit(List<Integer> list, Integer number) {
         int pick1 = list.stream().filter(i -> i >= number).min(Comparator.comparingInt(i -> i - number)).orElse(0);
         return (pick1 > 0) ? pick1 : list.stream().filter(i -> i < number).max(Comparator.comparingInt(i -> i)).orElse(0);
-    }
-
-    static int min(List<Integer> list, Integer number) {
-        return list.stream()
-                .min(Comparator.comparingInt(i -> number)).orElse(0);
-    }
-
-    static int max(List<Integer> list, Integer number) {
-        return list.stream()
-                .max(Comparator.comparingInt(i -> number)).orElse(0);
-    }
-
-    private String getIndicator(int free) {
-        if (free <= 0) {
-            return "FULL";
-        } else if (free <= LIMITED) {
-            return "LIMITED";
-        } else if (free <= WARNING) {
-            return "WARNING";
-        } else {
-            return "";
-        }
     }
 
 }
