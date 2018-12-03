@@ -9,9 +9,10 @@ import java.util.Map;
 
 public class PatientDao {
 
-    public List<Map<String, Object>> list() {
-        final String sql = "SELECT * FROM PATIENTS ORDER BY NAME ASC";
+    public List<Map<String, Object>> list(String token) {
+        final String sql = "SELECT * FROM PATIENTS WHERE NAME LIKE CONCAT('%',:NAME,'%') OR :NAME = '' ORDER BY NAME ASC";
         return DB.get().withHandle(db -> db.createQuery(sql)
+                .bind("NAME", token)
                 .map(new DBMapMapper(CaseFormat.LOWER_CAMEL))
                 .list());
     }

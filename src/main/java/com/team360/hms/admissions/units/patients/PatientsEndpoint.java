@@ -22,9 +22,8 @@ public class PatientsEndpoint {
     ContainerRequestContext crc;
 
     @GET
-    public Response get() {
-//        Stream<DBEntity> s = .stream().map((map) -> new Patient().load(map));
-        return Response.ok().entity(new PatientDao().list()).build();
+    public Response get(@QueryParam("q") String q) {
+        return Response.ok().entity(new PatientDao().list(q)).build();
     }
 
     @GET
