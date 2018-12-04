@@ -46,7 +46,7 @@ public class Main {
     private static final String DEFAULT_DB_USER = "root";
     private static final String DEFAULT_IS_SECURE = "false";
     private static final String DEFAULT_URI = "http://0.0.0.0:8080";
-    private static final String DEFAULT_DOMAIN_NAME = "localhost";
+    private static final String DEFAULT_DOMAIN_NAME = null;
     private static final String DEFAULT_CONTEXT = "";
     private static final String DEFAULT_ACCESS_TIMEOUT = String.valueOf(20 * 60);
     private static final String DEFAULT_REFRESH_TIMEOUT = String.valueOf(7 * 24 * 60 * 60);
