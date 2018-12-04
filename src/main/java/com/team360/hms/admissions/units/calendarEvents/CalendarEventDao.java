@@ -23,7 +23,7 @@ public class CalendarEventDao {
     }
 
     public List<Map<String, Object>> listByPatient(Integer patientId) {
-        final String sql = LIST_SQL + " WHERE P.ID = :PATIENT_ID ORDER BY ADMISSION_DATE ASC, RELEASE_DATE ASC";
+        final String sql = LIST_SQL + " WHERE P.ID = :PATIENT_ID ORDER BY ADMISSION_DATE DESC, RELEASE_DATE DESC";
         return DB.get().withHandle(db -> db.createQuery(sql)
                 .bind("PATIENT_ID", patientId)
                 .map(new DBMapMapper(CaseFormat.LOWER_CAMEL))

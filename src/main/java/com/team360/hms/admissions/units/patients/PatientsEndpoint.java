@@ -2,6 +2,7 @@ package com.team360.hms.admissions.units.patients;
 
 import com.team360.hms.admissions.db.DBEntity;
 import com.team360.hms.admissions.units.WebUtl;
+import com.team360.hms.admissions.units.calendarEvents.CalendarEventDao;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
 import org.jdbi.v3.core.Handle;
@@ -61,6 +62,13 @@ public class PatientsEndpoint {
             return true;
         }, patient);
         return Response.ok().build();
+    }
+
+    @GET
+    @Path("/{id}/events")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response events(@PathParam("id") Integer id) {
+        return Response.ok().entity((new CalendarEventDao().listByPatient(id))).build();
     }
 
 }

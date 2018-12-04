@@ -22,13 +22,10 @@ public class CalendarEventsEndpoint {
     @GET
     public Response get(
             @QueryParam("from") String from,
-            @QueryParam("to") String to,
-            @QueryParam("patient") Integer patient) {
+            @QueryParam("to") String to) {
 
         if (from != null && to != null) {
             return Response.ok().entity((new CalendarEventDao().listByDate(from, to))).build();
-        } else if (patient != null) {
-            return Response.ok().entity((new CalendarEventDao().listByPatient(patient))).build();
         } else {
             return Response.ok().build();
         }
