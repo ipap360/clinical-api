@@ -31,6 +31,7 @@ public class UserForm {
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
         }
+
         return this;
     }
 

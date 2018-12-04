@@ -42,7 +42,6 @@ public class UsersEndpoint {
         }
 
         User user = new User().load(form);
-        user.setPassword(HashedString.of(form.getPassword()).getValue());
         user.setUuid(UUID.randomUUID().toString());
 
         WebUtl.db(crc).upsert(user);
