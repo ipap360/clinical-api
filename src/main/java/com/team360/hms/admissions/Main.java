@@ -1,5 +1,6 @@
 package com.team360.hms.admissions;
 
+import com.team360.hms.admissions.common.SystemMailer;
 import com.team360.hms.admissions.common.values.RandomToken;
 import com.team360.hms.admissions.db.DB;
 import com.team360.hms.admissions.db.DBManagerConfig;
@@ -7,6 +8,7 @@ import com.team360.hms.admissions.web.MyObjectMapperProvider;
 import com.team360.hms.admissions.web.WebConfig;
 import com.team360.hms.admissions.web.WebServerManager;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
@@ -35,6 +37,11 @@ public class Main {
     public static final String REFRESH_CLIENT_COOKIE = "REFRESH_CLIENT_COOKIE";
     public static final String SIGNATURE_KEY = "SIGNATURE_KEY";
     public static final String ADMIN = "ADMIN";
+    public static final String SYSTEM_EMAIL_HOST = "SYSTEM_EMAIL_HOST";
+    public static final String SYSTEM_EMAIL_PORT = "SYSTEM_EMAIL_PORT";
+    public static final String SYSTEM_EMAIL_TRANSPORT = "SYSTEM_EMAIL_TRANSPORT";
+    public static final String SYSTEM_EMAIL_USER = "SYSTEM_EMAIL_USER";
+    public static final String SYSTEM_EMAIL_PASS = "SYSTEM_EMAIL_PASS";
     public static final boolean DEBUG_MODE = java.lang.management.ManagementFactory.getRuntimeMXBean().
             getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
     private static final String DEFAULT_BUILD_MODE = "DEV";
@@ -138,15 +145,19 @@ public class Main {
                     .packages("com.team360.hms.admissions")
                     .register(MyObjectMapperProvider.class)
                     .register(JacksonFeature.class)
-//                    .register(new AbstractBinder() {
-//                        @Override
-//                        protected void configure() {
-//
-//                        }
-//                    })
                     .property(ServerProperties.METAINF_SERVICES_LOOKUP_DISABLE, true);
 
             WebServerManager.start(rc, conf);
+
+            String host = opts.get(SYSTEM_EMAIL_HOST);
+            Integer port = Integer.valueOf(opts.get(SYSTEM_EMAIL_PORT));
+            String trns = opts.get(SYSTEM_EMAIL_TRANSPORT);
+            if (StringUtils.isNotEmpty(host)) {
+                SystemMailer.init(host, port, trns,
+                        opts.get(SYSTEM_EMAIL_USER),
+                        opts.get(SYSTEM_EMAIL_PASS),
+                        DEBUG_MODE);
+            }
 
             if (opts.get(BUILD_MODE).equals(DEFAULT_BUILD_MODE)) {
                 System.out.println("Press Enter to exit..");

@@ -4,7 +4,8 @@ import com.team360.hms.admissions.common.GenericEntity;
 import com.team360.hms.admissions.common.values.HashedString;
 import com.team360.hms.admissions.db.DBEntityField;
 import com.team360.hms.admissions.db.DBEntityMeta;
-import com.team360.hms.admissions.units.profile.PasswordForm;
+import com.team360.hms.admissions.units.password.ResetPasswordForm;
+import com.team360.hms.admissions.units.profile.ChangePasswordForm;
 import com.team360.hms.admissions.units.profile.ProfileForm;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -47,7 +48,12 @@ public class User extends GenericEntity {
         return this;
     }
 
-    public User load(PasswordForm form) {
+    public User load(ResetPasswordForm form) {
+        setPassword(HashedString.of(form.getPassword()).getValue());
+        return this;
+    }
+
+    public User load(ChangePasswordForm form) {
         setPassword(HashedString.of(form.getNewPassword()).getValue());
         return this;
     }

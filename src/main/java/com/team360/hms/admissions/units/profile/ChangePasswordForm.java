@@ -10,13 +10,13 @@ import lombok.Data;
 import java.util.HashMap;
 
 @Data
-public class PasswordForm {
+public class ChangePasswordForm {
 
     private String oldPassword;
 
     private String newPassword;
 
-    PasswordForm validate(User user) {
+    ChangePasswordForm validate(User user) {
         HashMap<String, String> errors = new HashMap();
 
         if (getOldPassword() == null) {

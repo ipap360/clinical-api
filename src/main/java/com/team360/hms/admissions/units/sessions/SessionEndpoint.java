@@ -49,7 +49,7 @@ public class SessionEndpoint {
             @HeaderParam(IFilter.IP_HEADER) String ip,
             LoginForm form) {
 
-        Optional<Integer> id = UserDao.findByUsername(form.getUsername());
+        Optional<Integer> id = (new UserDao()).findByUsername(form.getUsername());
         if (!id.isPresent()) {
             throw new AuthenticationException(AuthenticationException.FAILED, INVALID_CREDENTIALS);
         }

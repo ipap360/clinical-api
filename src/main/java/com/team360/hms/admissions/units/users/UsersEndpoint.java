@@ -36,7 +36,7 @@ public class UsersEndpoint {
 
         form.validate();
 
-        Optional<Integer> id = UserDao.findByUsername(form.getUsername());
+        Optional<Integer> id = (new UserDao()).findByUsername(form.getUsername());
         if (id.isPresent()) {
             throw new DomainException("This username already exists!");
         }

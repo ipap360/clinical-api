@@ -38,7 +38,7 @@ public class ProfileEndpoint {
     @POST
     @Path("/password")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response upsert(PasswordForm form) {
+    public Response upsert(ChangePasswordForm form) {
         User u = getUser();
         form.validate(u);
         WebUtl.db(crc).upsert(u.load(form));
