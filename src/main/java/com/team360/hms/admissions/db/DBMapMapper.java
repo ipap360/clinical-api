@@ -2,6 +2,7 @@ package com.team360.hms.admissions.db;
 
 import com.google.common.base.CaseFormat;
 import com.team360.hms.admissions.common.utils.DateUtils;
+import liquibase.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -59,6 +60,11 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                 if (this.format != null) {
                     name = DB.format().to(this.format, name);
                 }
+                Object test = rs.getObject(i);
+                if (test == null) {
+                    row.put(name, test);
+                    continue;
+                }
                 switch (type) {
                     case Types.VARCHAR:
                     case Types.LONGNVARCHAR:
@@ -69,16 +75,16 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                     case Types.CLOB:
                     case Types.NCLOB:
                         String value = rs.getString(i);
-                        if (isEncrypted(m, i)) {
+                        if (isEncrypted(m, i) && StringUtils.isNotEmpty(value)) {
                             try {
                                 value = new String(
                                         AES_GCM.decrypt(
-                                                secret.getBytes(),
+                                                secret.getBytes("UTF-8"),
                                                 Base64.getDecoder().decode(value),
                                                 null
                                         )
                                 );
-                            } catch (AuthenticatedEncryptionException | IllegalArgumentException e) {
+                            } catch (Exception e) {
                                 log.debug(e.getMessage(), e);
                             }
                         }

@@ -1,15 +1,15 @@
 package com.team360.hms.admissions.units.sessions;
 
+import com.team360.hms.admissions.common.GenericEntity;
 import com.team360.hms.admissions.db.DBEntityField;
 import com.team360.hms.admissions.db.DBEntityMeta;
-import com.team360.hms.admissions.common.GenericEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.Instant;
 
 @Data
-@EqualsAndHashCode(callSuper=true)
+@EqualsAndHashCode(callSuper = true)
 @DBEntityMeta(name = "SESSIONS", label = "Session")
 public class Session extends GenericEntity {
 

@@ -3,10 +3,10 @@
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet author="ipap" id="0" runOnChange="true">
+    <changeSet author="ipap" id="0">
         <comment>DB initialization!</comment>
         <createTable tableName="USERS">
-            <column name="ID" type="int">
+            <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="UUID" type="varchar(36)"/>
@@ -23,8 +23,13 @@
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
+        <createIndex indexName="USERNAME_IDX"
+                     tableName="USERS"
+                     unique="true">
+            <column name="USERNAME" type="varchar(255)"/>
+        </createIndex>
         <createTable tableName="SESSIONS">
-            <column name="ID" type="int">
+            <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="UUID" type="varchar(36)"/>
@@ -38,6 +43,23 @@
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
+        <createIndex indexName="UUID_IDX"
+                     tableName="SESSIONS"
+                     unique="true">
+            <column name="UUID" type="varchar(36)"/>
+        </createIndex>
+        <createIndex indexName="USER_IDX"
+                     tableName="SESSIONS"
+                     unique="false">
+            <column name="USER_ID" type="int"/>
+            <column name="EXPIRES_AT" type="timestamp"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="USERS"/>
+            <dropTable tableName="SESSIONS"/>
+        </rollback>
+    </changeSet>
+    <changeSet author="ipap" id="1">
         <createTable tableName="DATES">
             <column name="ID" type="date">
                 <constraints primaryKey="true" nullable="false"/>
@@ -49,15 +71,14 @@
             <column name="MONTH_OF_YEAR" type="int"/>
             <column name="YEAR_OF" type="int"/>
         </createTable>
+        <customChange class="com.team360.hms.admissions.data.PopulateDBDates"/>
         <rollback>
-            <dropTable tableName="USERS"/>
-            <dropTable tableName="SESSIONS"/>
             <dropTable tableName="DATES"/>
         </rollback>
     </changeSet>
-    <changeSet author="ipap" id="1">
+    <changeSet author="ipap" id="2">
         <createTable tableName="PATIENTS">
-            <column name="ID" type="int">
+            <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="NAME" type="varchar(255)"/>
@@ -70,8 +91,8 @@
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
-        <createTable tableName="CALENDAR_EVENTS">
-            <column name="ID" type="int">
+        <createTable tableName="ADMISSIONS">
+            <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="PATIENT_ID" type="int"/>
@@ -87,78 +108,86 @@
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
+        <createIndex indexName="RDATE_IDX"
+                     tableName="ADMISSIONS"
+                     unique="false">
+            <column name="RELEASE_DATE" type="date"/>
+        </createIndex>
+        <createIndex indexName="ADATE_IDX"
+                     tableName="ADMISSIONS"
+                     unique="false">
+            <column name="ADMISSION_DATE" type="date"/>
+        </createIndex>
+        <createIndex indexName="PATIENT_IDX"
+                     tableName="ADMISSIONS"
+                     unique="false">
+            <column name="PATIENT_ID" type="int"/>
+        </createIndex>
         <rollback>
             <dropTable tableName="PATIENTS"/>
-            <dropTable tableName="CALENDAR_EVENTS"/>
+            <dropTable tableName="ADMISSIONS"/>
         </rollback>
     </changeSet>
-    <changeSet author="ipap" id="2">
-        <customChange class="com.team360.hms.admissions.data.PopulateDBDates"/>
-    </changeSet>
     <changeSet author="ipap" id="3">
-        <createTable tableName="REGISTRATIONS">
-            <column name="ID" type="int">
+        <createTable tableName="ROOMS">
+            <column name="ID" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="EMAIL" type="varchar(255)">
-                <constraints nullable="false"/>
+            <column name="NAME" type="varchar(255)"/>
+            <column name="CAPACITY" type="int"/>
+            <column name="CREATE_USER_ID" type="int"/>
+            <column name="MODIFY_USER_ID" type="int"/>
+            <column name="CREATED_AT" type="timestamp"/>
+            <column name="MODIFIED_AT" type="timestamp"/>
+        </createTable>
+        <createTable tableName="THRESHOLDS">
+            <column name="ID" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="PASSWORD" type="text"/>
-            <column name="STATUS" type="varchar(255)"/>
-            <column name="RETRIES" type="int"/>
-            <column name="IP" type="varchar(255)"/>
-            <column name="USER_AGENT" type="varchar(255)"/>
-            <column name="TOKEN" type="text"/>
-            <column name="LOCALE" type="varchar(255)"/>
-            <column name="TIMEZONE" type="varchar(255)"/>
+            <column name="DESCRIPTION" type="varchar(255)"/>
+            <column name="THRESHOLD" type="int"/>
+            <column name="INDICATOR" type="varchar(255)"/>
             <column name="CREATE_USER_ID" type="int"/>
             <column name="MODIFY_USER_ID" type="int"/>
             <column name="CREATED_AT" type="timestamp"/>
             <column name="MODIFIED_AT" type="timestamp"/>
         </createTable>
         <rollback>
-            <dropTable tableName="REGISTRATIONS"/>
+            <dropTable tableName="ROOMS"/>
+            <dropTable tableName="THRESHOLDS"/>
         </rollback>
     </changeSet>
-    <!--    <changeSet author="ipap" id="3">
-            <createView replaceIfExists="true"
-                        viewName="CALENDAR_VIEW">
-
-            </createView>
-        </changeSet>-->
-    <!--    <changeSet author="ipap" id="init_indexes">
-            <createIndex catalogName=""
-                         indexName="EMAIL_STATUS_IDX"
-                         schemaName=""
-                         tableName="REGISTRATIONS"
-                         tablespace=""
-                         unique="false">
-                <column name="EMAIL" type="varchar(255)"/>
-                <column name="STATUS" type="int"/>
-            </createIndex>
-            <createIndex catalogName=""
-                         indexName="USERNAME_IDX"
-                         schemaName=""
-                         tableName="USERS"
-                         tablespace=""
-                         unique="true">
-                <column name="USERNAME" type="varchar(255)"/>
-            </createIndex>
-            <createIndex catalogName=""
-                         indexName="USERID_IDX"
-                         schemaName=""
-                         tableName="SESSIONS"
-                         tablespace=""
-                         unique="true">
-                <column name="USER_ID" type="int"/>
-            </createIndex>
-            <createIndex catalogName=""
-                         indexName="UUID_IDX"
-                         schemaName=""
-                         tableName="SESSIONS"
-                         tablespace=""
-                         unique="true">
-                <column name="UUID" type="varchar(36)"/>
-            </createIndex>
-        </changeSet>-->
+    <changeSet author="ipap" id="4">
+        <createTable tableName="PASSWORD_RESET_REQUESTS">
+            <column name="ID" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="EMAIL" type="varchar(255)"/>
+            <column name="TOKEN" type="text"/>
+            <column name="EXPIRES_AT" type="timestamp"/>
+            <column name="STATUS" type="varchar(255)"/>
+            <column name="IP" type="varchar(255)"/>
+            <column name="USER_AGENT" type="varchar(255)"/>
+            <column name="CREATE_USER_ID" type="int"/>
+            <column name="MODIFY_USER_ID" type="int"/>
+            <column name="CREATED_AT" type="timestamp"/>
+            <column name="MODIFIED_AT" type="timestamp"/>
+        </createTable>
+        <createIndex indexName="USER_IDX"
+                     tableName="PASSWORD_RESET_REQUESTS"
+                     unique="false">
+            <column name="EMAIL" type="varchar(255)"/>
+            <column name="EXPIRES_AT" type="timestamp"/>
+        </createIndex>
+        <createIndex indexName="IP_IDX"
+                     tableName="PASSWORD_RESET_REQUESTS"
+                     unique="false">
+            <column name="IP" type="varchar(255)"/>
+            <column name="STATUS" type="varchar(255)"/>
+            <column name="CREATED_AT" type="timestamp"/>
+        </createIndex>
+        <rollback>
+            <dropTable tableName="PASSWORD_RESET_REQUESTS"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

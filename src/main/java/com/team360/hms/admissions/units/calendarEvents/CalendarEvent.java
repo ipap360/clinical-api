@@ -1,8 +1,8 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
-import com.team360.hms.admissions.db.DBEntityMeta;
-import com.team360.hms.admissions.db.DBEntityField;
 import com.team360.hms.admissions.common.GenericEntity;
+import com.team360.hms.admissions.db.DBEntityField;
+import com.team360.hms.admissions.db.DBEntityMeta;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,8 +11,8 @@ import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper=true)
-@DBEntityMeta(name = "CALENDAR_EVENTS", label = "Event")
+@EqualsAndHashCode(callSuper = true)
+@DBEntityMeta(name = "ADMISSIONS", label = "Event")
 public class CalendarEvent extends GenericEntity implements Cloneable {
 
     @DBEntityField(name = "NOTES")
@@ -44,6 +44,7 @@ public class CalendarEvent extends GenericEntity implements Cloneable {
     }
 
     public CalendarEvent load(CalendarEventForm form) {
+        setId(form.getId());
         setPatientId(form.getPatient());
         setNotes(form.getNotes());
         setAdmissionDate(form.getDate());

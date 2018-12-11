@@ -35,8 +35,7 @@ public abstract class GenericEntity implements DBEntity {
         return this;
     }
 
-    public DBEntity initialize(Integer id, DBUser user) {
-        setId(id);
+    public DBEntity initialize(DBUser user) {
         createUserId = user.getId();
         modifyUserId = user.getId();
         createdAt = Instant.now();

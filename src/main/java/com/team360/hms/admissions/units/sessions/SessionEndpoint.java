@@ -17,6 +17,9 @@ import lombok.extern.log4j.Log4j2;
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -30,16 +33,17 @@ public class SessionEndpoint {
     private static final String INVALID_CREDENTIALS = "Invalid username or password";
     private static final String SESSION_EXPIRED = "This session has expired";
     private static final Date ZERO_DATE = new Date(0);
+    private static final int MIN_TOKEN_DAYS = 5;
 
     @Context
-    ContainerRequestContext crc;
+    SecurityContext sc;
 
     @GET
     @Secured
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{uuid}")
     public Response get(@PathParam("uuid") String uuid) {
-        return Response.ok().entity(new SessionDetails().load((new SessionDao()).findByUuidAndUserId(uuid, WebUtl.getUser(crc)))).build();
+        return Response.ok().entity(new SessionDetails().load((new SessionDao()).findByUuidAndUserId(uuid, WebUtl.getUser(sc).getId()))).build();
     }
 
     @POST
@@ -49,13 +53,13 @@ public class SessionEndpoint {
             @HeaderParam(IFilter.IP_HEADER) String ip,
             LoginForm form) {
 
-        Optional<Integer> id = UserDao.findByUsername(form.getUsername());
+        Optional<Integer> id = (new UserDao()).findByUsername(form.getUsername());
         if (!id.isPresent()) {
             throw new AuthenticationException(AuthenticationException.FAILED, INVALID_CREDENTIALS);
         }
 
         User u = new User();
-        WebUtl.db(crc).read(u.setId(id.get()));
+        WebUtl.db(sc).read(u.setId(id.get()));
         HashedString pass = HashedString.fromHash(u.getPassword());
         if (!pass.isHashOf(form.getPassword())) {
             throw new AuthenticationException(AuthenticationException.FAILED, INVALID_CREDENTIALS);
@@ -68,7 +72,7 @@ public class SessionEndpoint {
         s.setUserAgent(userAgent);
         s.setUuid(UUID.randomUUID().toString());
 
-        return wrapResponse(createSession(s));
+        return wrapResponse(createSession(s, u));
     }
 
     @POST
@@ -99,35 +103,43 @@ public class SessionEndpoint {
         }
 
         Session session = new Session();
-        WebUtl.db(crc).read(session.setId(id.get()));
+        WebUtl.db(sc).read(session.setId(id.get()));
         HashedString secret = HashedString.fromHash(session.getSecret());
         if (!secret.isHashOf(refreshToken)) {
             throw new AuthenticationException(AuthenticationException.FAILED, SESSION_EXPIRED);
         }
 
+        User user = new User();
+        WebUtl.db(sc).read(user.setId(session.getUserId()));
+
         if (isCookieBased == true) {
-            return wrapResponse(createSession(session));
+            return wrapResponse(createSession(session, user));
         }
 
-        return Response.ok().entity(createSession(session)).build();
+        return Response.ok().entity(createSession(session, user)).build();
     }
 
-    private SessionAcquiredSuccessfully createSession(Session session) {
-        RefreshToken refreshToken = RefreshToken.generate();
+    private SessionAcquiredSuccessfully createSession(Session session, User user) {
 
-        session.setSecret(refreshToken.getHash());
-        session.setExpiresAt(refreshToken.getExpiry());
+        RefreshToken refreshToken = null;
+        if (session.getExpiresAt() == null || session.getExpiresAt().minus(MIN_TOKEN_DAYS, ChronoUnit.DAYS).isBefore(Instant.now())) {
+            refreshToken = RefreshToken.generate();
+            session.setSecret(refreshToken.getHash());
+            session.setExpiresAt(refreshToken.getExpiry());
+        }
 
-        WebUtl.db(crc).upsert(session);
+        WebUtl.db(sc).upsert(session);
 
         String accessToken = AccessToken
-                .withClaims(session.getUserId())
+                .withClaims(user.getId(), user.getUsername(), user.getLocale(), user.getTimezone())
                 .getValue();
 
         SessionAcquiredSuccessfully ok = new SessionAcquiredSuccessfully();
 
         ok.setAccessToken(accessToken);
-        ok.setRefreshToken(refreshToken.getValue());
+        if (refreshToken != null) {
+            ok.setRefreshToken(refreshToken.getValue());
+        }
         ok.setDetails(new SessionDetails().load((new SessionDao()).findByUuidAndUserId(session.getUuid(), session.getUserId())));
 
         return ok;
@@ -143,9 +155,9 @@ public class SessionEndpoint {
         if (id.isPresent()) {
             Session s = new Session();
             s.setId(id.get());
-            WebUtl.db(crc).read(s);
+            WebUtl.db(sc).read(s);
             s.setExpired();
-            WebUtl.db(crc).update(s);
+            WebUtl.db(sc).update(s);
         }
 
         Map<String, Cookie> cookies = headers.getCookies();
@@ -166,13 +178,29 @@ public class SessionEndpoint {
 
     private Response wrapResponse(SessionAcquiredSuccessfully entity) {
 
+        WebConfig conf = WebUtl.conf();
+        int expiry = conf.getRefreshTokenTimeout();
+
+        WebCookie ac = WebCookie.builder()
+                .name(conf.getAccessTokenCookie())
+                .body(entity.getAccessToken())
+                .expiry(expiry)
+                .build();
+
+        WebCookie xc = WebCookie.builder()
+                .name(conf.getXsrfCookie())
+                .body(RandomToken.withLength(20).getValue())
+                .expiry(expiry)
+                .httpOnly(false)
+                .build();
+
         String token = entity.getRefreshToken();
+        if (token == null) {
+            return Response.ok().cookie(ac.getValue(), xc.getValue()).entity(entity.getDetails()).build();
+        }
+
         final int pos = token.length() / 2;
         String[] parts = {token.substring(0, pos), token.substring(pos)};
-
-        WebConfig conf = WebUtl.conf();
-
-        int expiry = conf.getRefreshTokenTimeout();
         String path = conf.getContext() + "/sessions";
 
         WebCookie rc1 = WebCookie.builder()
@@ -188,19 +216,6 @@ public class SessionEndpoint {
                 .expiry(expiry)
                 .httpOnly(false)
                 .body(parts[1])
-                .build();
-
-        WebCookie ac = WebCookie.builder()
-                .name(conf.getAccessTokenCookie())
-                .body(entity.getAccessToken())
-                .expiry(expiry)
-                .build();
-
-        WebCookie xc = WebCookie.builder()
-                .name(conf.getXsrfCookie())
-                .body(RandomToken.withLength(20).getValue())
-                .expiry(expiry)
-                .httpOnly(false)
                 .build();
 
         return Response.ok().cookie(rc1.getValue(), rc2.getValue(), ac.getValue(), xc.getValue()).entity(entity.getDetails()).build();

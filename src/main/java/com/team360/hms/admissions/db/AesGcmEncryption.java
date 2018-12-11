@@ -4,8 +4,8 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.security.Provider;
 import java.security.SecureRandom;
+import java.util.Arrays;
 
 /**
  * Implements AES (Advanced Encryption Standard) with Galois/Counter Mode (GCM), which is a mode of
@@ -34,20 +34,9 @@ public final class AesGcmEncryption {
     private static final int IV_LENGTH_BYTE = 12;
 
     private final SecureRandom secureRandom;
-    private final Provider provider;
-    private Cipher cipher;
 
     public AesGcmEncryption() {
-        this(new SecureRandom(), null);
-    }
-
-    public AesGcmEncryption(SecureRandom secureRandom) {
-        this(secureRandom, null);
-    }
-
-    public AesGcmEncryption(SecureRandom secureRandom, Provider provider) {
-        this.secureRandom = secureRandom;
-        this.provider = provider;
+        secureRandom = new SecureRandom();
     }
 
     public byte[] encrypt(byte[] rawEncryptionKey, byte[] rawData, byte[] associatedData) throws AuthenticatedEncryptionException {
@@ -60,26 +49,24 @@ public final class AesGcmEncryption {
             iv = new byte[IV_LENGTH_BYTE];
             secureRandom.nextBytes(iv);
 
-            final Cipher cipherEnc = getCipher();
-            cipherEnc.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(rawEncryptionKey, "AES"), new GCMParameterSpec(TAG_LENGTH_BIT, iv));
-
+            final Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(rawEncryptionKey, "AES"), new GCMParameterSpec(TAG_LENGTH_BIT, iv));
             if (associatedData != null) {
-                cipherEnc.updateAAD(associatedData);
+                cipher.updateAAD(associatedData);
             }
 
-            encrypted = cipherEnc.doFinal(rawData);
+            encrypted = cipher.doFinal(rawData);
 
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1 + iv.length + encrypted.length);
-            byteBuffer.put((byte) iv.length);
-            byteBuffer.put(iv);
-            byteBuffer.put(encrypted);
-            return byteBuffer.array();
+            return ByteBuffer.allocate(4 + iv.length + encrypted.length)
+                    .putInt(iv.length)
+                    .put(iv)
+                    .put(encrypted)
+                    .array();
         } catch (Exception e) {
             throw new AuthenticatedEncryptionException("could not encrypt", e);
         } finally {
-            // clean memory with randomness
-            secureRandom.nextBytes(iv);
-            secureRandom.nextBytes(encrypted);
+            safeDelete(iv);
+            safeDelete(encrypted);
         }
     }
 
@@ -88,45 +75,33 @@ public final class AesGcmEncryption {
         byte[] encrypted = null;
         try {
             ByteBuffer byteBuffer = ByteBuffer.wrap(encryptedData);
-
-            int ivLength = byteBuffer.get();
-            iv = new byte[ivLength];
-            byteBuffer.get(iv);
+            int ivLength = byteBuffer.getInt();
+            if (ivLength < 12 || ivLength >= 16) {
+                throw new IllegalArgumentException("invalid iv length");
+            }
             encrypted = new byte[byteBuffer.remaining()];
             byteBuffer.get(encrypted);
+            iv = Arrays.copyOfRange(encrypted, 0, ivLength);
 
-            final Cipher cipherDec = getCipher();
-            cipherDec.init(Cipher.DECRYPT_MODE, new SecretKeySpec(rawEncryptionKey, "AES"), new GCMParameterSpec(TAG_LENGTH_BIT, iv));
+            final Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(rawEncryptionKey, "AES"), new GCMParameterSpec(TAG_LENGTH_BIT, iv));
             if (associatedData != null) {
-                cipherDec.updateAAD(associatedData);
+                cipher.updateAAD(associatedData);
             }
-            return cipherDec.doFinal(encrypted);
+
+            return cipher.doFinal(encrypted, ivLength, encrypted.length - ivLength);
         } catch (Exception e) {
             throw new AuthenticatedEncryptionException("could not decrypt", e);
         } finally {
-            // clean memory with randomness
-            secureRandom.nextBytes(iv);
-            secureRandom.nextBytes(encrypted);
+            safeDelete(iv);
+            safeDelete(encrypted);
         }
     }
 
-//    @Override
-//    public int byteSizeLength(@KeyStrength int keyStrengthType) {
-//        return keyStrengthType == STRENGTH_HIGH ? 16 : 32;
-//    }
-
-    private Cipher getCipher() {
-        if (cipher == null) {
-            try {
-                if (provider != null) {
-                    cipher = Cipher.getInstance(ALGORITHM, provider);
-                } else {
-                    cipher = Cipher.getInstance(ALGORITHM);
-                }
-            } catch (Exception e) {
-                throw new IllegalStateException("could not get cipher instance", e);
-            }
+    private void safeDelete(byte[] array) {
+        if (array != null) {
+            Arrays.fill(array, (byte) 0);
         }
-        return cipher;
     }
+
 }

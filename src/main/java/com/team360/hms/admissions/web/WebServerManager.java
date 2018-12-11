@@ -43,7 +43,9 @@ public class WebServerManager {
     }
 
     public static void stop() {
-        instance.destroy();
+        if (instance != null) {
+            instance.destroy();
+        }
         instance = null;
     }
 

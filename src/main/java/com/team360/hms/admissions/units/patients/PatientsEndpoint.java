@@ -1,8 +1,11 @@
 package com.team360.hms.admissions.units.patients;
 
+import com.team360.hms.admissions.db.DBEntity;
 import com.team360.hms.admissions.units.WebUtl;
+import com.team360.hms.admissions.units.calendarEvents.CalendarEventDao;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
+import org.jdbi.v3.core.Handle;
 
 import javax.ws.rs.*;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -20,9 +23,8 @@ public class PatientsEndpoint {
     ContainerRequestContext crc;
 
     @GET
-    public Response get() {
-//        Stream<DBEntity> s = .stream().map((map) -> new Patient().load(map));
-        return Response.ok().entity(new PatientDao().list()).build();
+    public Response get(@QueryParam("q") String q) {
+        return Response.ok().entity(new PatientDao().list(q)).build();
     }
 
     @GET
@@ -39,11 +41,11 @@ public class PatientsEndpoint {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, PatientForm form) {
-        form.validate(id);
+        form.setId(id);
+        form.validate();
         Patient patient = new Patient();
-        patient.setId(id);
         WebUtl.db(crc).upsert(patient.load(form));
-        return Response.ok().build();
+        return Response.ok().entity(form.load(patient)).build();
     }
 
 
@@ -53,8 +55,20 @@ public class PatientsEndpoint {
     public Response delete(@PathParam("id") Integer id) {
         Patient patient = new Patient();
         patient.setId(id);
-        WebUtl.db(crc).delete(patient);
+        WebUtl.db(crc).delete((Handle db, DBEntity entity) -> {
+            db.createUpdate("DELETE FROM ADMISSIONS WHERE PATIENT_ID = :PATIENT_ID")
+                    .bind("PATIENT_ID", entity.getId())
+                    .execute();
+            return true;
+        }, patient);
         return Response.ok().build();
+    }
+
+    @GET
+    @Path("/{id}/events")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response events(@PathParam("id") Integer id) {
+        return Response.ok().entity((new CalendarEventDao().listByPatient(id))).build();
     }
 
 }

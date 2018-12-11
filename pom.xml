@@ -6,7 +6,7 @@
 
     <groupId>com.team360.hospital</groupId>
     <artifactId>bed-management</artifactId>
-    <version>0.0.1</version>
+    <version>0.2.0</version>
 
     <properties>
         <app.main.class>com.team360.hms.admissions.Main</app.main.class>
@@ -30,7 +30,7 @@
         <commons-text.version>1.4</commons-text.version>
         <commons-lang.version>3.8</commons-lang.version>
 
-        <simplejavamail.version>5.0.3</simplejavamail.version>
+        <simplejavamail.version>5.1.0</simplejavamail.version>
         <emailaddress.version>1.1.0</emailaddress.version>
 
         <!-- test -->
@@ -187,32 +187,32 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
-<!--        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.22.0</version>
-            <scope>test</scope>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
+                    <version>2.22.0</version>
+                    <scope>test</scope>
+                </dependency>-->
         <!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
-<!--        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.197</version>
-            <scope>test</scope>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>1.4.197</version>
+                    <scope>test</scope>
+                </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
-<!--        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <version>3.7.0</version>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
-<!--        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.1.0</version>
-            <type>maven-plugin</type>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <type>maven-plugin</type>
+                </dependency>-->
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
         <dependency>
             <groupId>org.apache.maven.plugins</groupId>
@@ -221,12 +221,12 @@
             <type>maven-plugin</type>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
-<!--        <dependency>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>3.0.2</version>
-            <type>maven-plugin</type>
-        </dependency>-->
+        <!--        <dependency>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.0.2</version>
+                    <type>maven-plugin</type>
+                </dependency>-->
     </dependencies>
 
     <build>
@@ -256,30 +256,24 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>${maven.shade}</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>java</goal>
                         </goals>
-                        <configuration>
-                            <!--<minimizeJar>true</minimizeJar>-->
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <manifestEntries>
-                                        <Main-Class>${app.main.class}</Main-Class>
-<!--                                        <X-Compile-Source-JDK>${maven.compile.source}</X-Compile-Source-JDK>
-                                        <X-Compile-Target-JDK>${maven.compile.target}</X-Compile-Target-JDK>-->
-                                    </manifestEntries>
-                                </transformer>
-                            </transformers>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <mainClass>${app.main.class}</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M2</version>
             </plugin>
         </plugins>
     </build>

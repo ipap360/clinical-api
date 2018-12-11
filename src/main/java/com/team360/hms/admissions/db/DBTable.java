@@ -69,7 +69,7 @@ public class DBTable {
 
         insertOnlyKeys.add("ID");
         insertOnlyKeys.add("CREATED_AT");
-        insertOnlyKeys.add("CREATOR_ID");
+        insertOnlyKeys.add("CREATE_USER_ID");
 
         columns.forEach((key, value) -> {
             insertKeys.add(key);

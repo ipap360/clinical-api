@@ -1,30 +1,20 @@
 package com.team360.hms.admissions.units.users;
 
-import com.team360.hms.admissions.common.exceptions.AuthenticationException;
 import com.team360.hms.admissions.common.exceptions.DomainException;
-import com.team360.hms.admissions.common.exceptions.FormValidationException;
 import com.team360.hms.admissions.common.values.HashedString;
-import com.team360.hms.admissions.common.values.Message;
 import com.team360.hms.admissions.units.WebUtl;
-import com.team360.hms.admissions.units.patients.Gender;
-import com.team360.hms.admissions.units.registration.Registration;
-import com.team360.hms.admissions.units.registration.RegistrationConfirmForm;
-import com.team360.hms.admissions.units.registration.RegistrationDao;
-import com.team360.hms.admissions.units.roomAvailability.RoomAvailability;
-import com.team360.hms.admissions.units.roomAvailability.RoomAvailabilityDao;
-import com.team360.hms.admissions.web.WebConfig;
-import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
-import org.json.JSONObject;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 @Log4j2
 @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -41,18 +31,17 @@ public class UsersEndpoint {
         String key = crc.getHeaderString("ADMIN");
         String masterKey = WebUtl.conf().getAdmin();
         if (masterKey != null && !masterKey.equals(key)) {
-            throw new DomainException("You do not have adequate permissions to perform this action");
+            throw new RuntimeException("You do not have adequate permissions to perform this action");
         }
 
-        form.validate(0);
+        form.validate();
 
-        Optional<Integer> id = UserDao.findByUsername(form.getUsername());
+        Optional<Integer> id = (new UserDao()).findByUsername(form.getUsername());
         if (id.isPresent()) {
-            throw new DomainException("This username already exists!");
+            throw new RuntimeException("This username already exists!");
         }
 
         User user = new User().load(form);
-        user.setPassword(HashedString.of(form.getPassword()).getValue());
         user.setUuid(UUID.randomUUID().toString());
 
         WebUtl.db(crc).upsert(user);

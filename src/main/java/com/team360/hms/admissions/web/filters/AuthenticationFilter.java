@@ -2,6 +2,7 @@ package com.team360.hms.admissions.web.filters;
 
 import com.team360.hms.admissions.common.exceptions.AuthenticationException;
 import com.team360.hms.admissions.web.AccessToken;
+import com.team360.hms.admissions.web.TokenBasedSecurityContext;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Priority;
@@ -28,7 +29,8 @@ public class AuthenticationFilter implements ContainerRequestFilter, IFilter {
             throw new AuthenticationException(AuthenticationException.FAILED, "Please sign in to access this resource");
         }
         AccessToken accessToken = AccessToken.parse(auth.substring(BEARER_PREFIX.length()));
-        requestContext.setProperty(JWT_PROP, accessToken);
+        boolean isSecure = requestContext.getSecurityContext().isSecure();
+        requestContext.setSecurityContext(new TokenBasedSecurityContext(accessToken, isSecure));
     }
 
 }

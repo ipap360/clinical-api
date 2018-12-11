@@ -1,14 +1,23 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
+import com.team360.hms.admissions.common.exceptions.FormValidationException;
+import com.team360.hms.admissions.common.values.Warning;
+import com.team360.hms.admissions.common.values.Week;
 import com.team360.hms.admissions.units.WebUtl;
 import com.team360.hms.admissions.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.BooleanUtils;
 
 import javax.ws.rs.*;
-import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Map;
+import java.util.Optional;
 
 @Secured
 @Log4j2
@@ -17,18 +26,15 @@ import javax.ws.rs.core.Response;
 public class CalendarEventsEndpoint {
 
     @Context
-    ContainerRequestContext crc;
+    SecurityContext sc;
 
     @GET
     public Response get(
             @QueryParam("from") String from,
-            @QueryParam("to") String to,
-            @QueryParam("patient") Integer patient) {
+            @QueryParam("to") String to) {
 
         if (from != null && to != null) {
             return Response.ok().entity((new CalendarEventDao().listByDate(from, to))).build();
-        } else if (patient != null) {
-            return Response.ok().entity((new CalendarEventDao().listByPatient(patient))).build();
         } else {
             return Response.ok().build();
         }
@@ -39,21 +45,24 @@ public class CalendarEventsEndpoint {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response view(@PathParam("id") Integer id) {
         CalendarEvent event = new CalendarEvent();
-        WebUtl.db(crc).read(event.setId(id));
+        WebUtl.db(sc).read(event.setId(id));
         CalendarEventForm form = new CalendarEventForm();
-        return Response.ok().entity(form.load(event)).build();
+        return Response.ok().entity(form.load(sc, event)).build();
     }
 
     @POST
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response upsert(@PathParam("id") Integer id, CalendarEventForm form) {
-        form.validate(id);
+        form.setId(id);
+        form.validate(sc);
         CalendarEvent event = new CalendarEvent();
-        event.setId(id);
         event.load(form);
-        WebUtl.db(crc).upsert(event);
-        return Response.ok().build();
+        if (BooleanUtils.isNotTrue(form.getNoWeekOverlapCheck())) {
+            checkOverlap(sc, event);
+        }
+        WebUtl.db(sc).upsert(event);
+        return Response.ok().entity(form.load(sc, event)).build();
     }
 
     @POST
@@ -62,7 +71,7 @@ public class CalendarEventsEndpoint {
     public Response delete(@PathParam("id") Integer id) {
         CalendarEvent event = new CalendarEvent();
         event.setId(id);
-        WebUtl.db(crc).delete(event);
+        WebUtl.db(sc).delete(event);
         return Response.ok().build();
     }
 
@@ -80,17 +89,34 @@ public class CalendarEventsEndpoint {
         return Response.ok().entity(copyOrPostpone("COPY", id, form)).build();
     }
 
-    private CalendarEvent copyOrPostpone(String mode, Integer id, CalendarEventCopyForm form) {
+    public static void checkOverlap(SecurityContext sc, CalendarEvent event) {
+        LocalDate d1 = event.getAdmissionDate();
+        Week week = new Week(WebUtl.getUser(sc).getLocale());
+        Optional<Map<String, Object>> result = (new CalendarEventDao()).checkOverlap(event.getId(), week.getFirstDay(d1).toString(), week.getLastDay(d1).toString(), event.getPatientId());
+        if (result.isPresent()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(WebUtl.getUser(sc).getLocale());
+            LocalDate d = (LocalDate) result.get().get("admissionDate");
+            String date = d.format(formatter);
+            String name = (String) result.get().get("name");
+            String body = String.format("There is a scheduled admission at %1$s for %2$s. Are you sure you want to proceed with this action?", date, name);
+            throw new FormValidationException(new Warning("Warning!", body, "noWeekOverlapCheck"));
+        }
+    }
 
+    private CalendarEvent copyOrPostpone(String mode, Integer id, CalendarEventCopyForm form) {
         CalendarEvent event1 = new CalendarEvent();
         event1.setId(id);
-        WebUtl.db(crc).read(event1);
+        WebUtl.db(sc).read(event1);
+        form.validate(event1);
 
         CalendarEvent event2 = new CalendarEvent();
         event2.setPatientId(event1.getPatientId());
-        event2.setNotes(form.getNotes());
         event2.setAdmissionDate(form.getDate());
+        if (BooleanUtils.isNotTrue(form.getNoWeekOverlapCheck())) {
+            checkOverlap(sc, event2);
+        }
         event2.setReleaseDate(form.getDate().plusDays(event1.getDuration()));
+        event2.setNotes(form.getNotes());
 
         if ("postpone".equalsIgnoreCase(mode)) {
             event1.setIsPostponed(true);
@@ -100,7 +126,7 @@ public class CalendarEventsEndpoint {
             event1.setIsCompleted(true);
         }
 
-        WebUtl.db(crc).upsert(event1, event2);
+        WebUtl.db(sc).upsert(event1, event2);
         return event2;
     }
 

@@ -13,18 +13,21 @@ import javax.ws.rs.ext.Provider;
 
 @Slf4j
 //@Secured
-@Provider
+//@Provider
 @Priority(Priorities.AUTHORIZATION)
 public class AuthorizationFilter implements ContainerRequestFilter, IFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
-        Integer userId = 0;
-        Object accessToken = requestContext.getProperty(JWT_PROP);
-        if (accessToken instanceof AccessToken) {
-            userId = ((AccessToken) accessToken).getUserId();
-        }
-        requestContext.setProperty("userId", userId);
+//        Integer userId = 0;
+//        Object accessToken = requestContext.getProperty(JWT_PROP);
+//        if (accessToken instanceof AccessToken) {
+//            AccessToken ac = (AccessToken) accessToken;
+//            userId = ac.getUserId();
+//            requestContext.setProperty("locale", ac.getLocale());
+//            requestContext.setProperty("timezone", ac.getTimezone());
+//        }
+//        requestContext.setProperty("userId", userId);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.team360.hms.admissions.db;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Stream;
@@ -75,9 +77,9 @@ public interface DBEntity {
                     boolean isEncrypted = encrypted.contains(fullName);
                     field.setAccessible(true);
                     Object value = field.get(this);
-                    if (isString && value != null && isEncrypted && encKey != null) {
+                    if (isString && StringUtils.isNotEmpty((String) value) && isEncrypted && encKey != null) {
                         try {
-                            map.put(F.name(), Base64.getEncoder().encodeToString(AES_GCM.encrypt(encKey.getBytes(), ((String) value).getBytes(), null)));
+                            map.put(F.name(), Base64.getEncoder().encodeToString(AES_GCM.encrypt(encKey.getBytes(), ((String) value).getBytes("UTF-8"), null)));
                         } catch (AuthenticatedEncryptionException e) {
                             e.printStackTrace();
                         }
@@ -97,7 +99,7 @@ public interface DBEntity {
 
     DBEntity setId(Integer id);
 
-    DBEntity initialize(Integer id, DBUser user);
+    DBEntity initialize(DBUser user);
 
     DBEntity markModified(DBUser user);
 

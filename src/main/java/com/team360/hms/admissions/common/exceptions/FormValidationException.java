@@ -1,5 +1,6 @@
 package com.team360.hms.admissions.common.exceptions;
 
+import com.team360.hms.admissions.common.values.Warning;
 import lombok.Getter;
 
 import java.util.Map;
@@ -10,6 +11,9 @@ public class FormValidationException extends RuntimeException {
 
     @Getter
     Map<String, String> errors;
+
+    @Getter
+    Warning warning;
 
     public FormValidationException(Map errors, String message) {
         super(message);
@@ -23,6 +27,11 @@ public class FormValidationException extends RuntimeException {
     public FormValidationException(Map errors) {
         super("");
         this.errors = errors;
+    }
+
+    public FormValidationException(Warning warning) {
+        super("");
+        this.warning = warning;
     }
 
 }

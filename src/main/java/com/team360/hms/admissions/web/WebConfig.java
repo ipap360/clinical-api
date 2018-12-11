@@ -4,9 +4,6 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Value;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-
 @Value
 @Builder
 public class WebConfig {
@@ -24,7 +21,7 @@ public class WebConfig {
     private String secret;
 
     @Builder.Default
-    private String domainName = "localhost";
+    private String domainName = null;
 
     @Builder.Default
     private String xsrfCookie = "XSRF-TOKEN";

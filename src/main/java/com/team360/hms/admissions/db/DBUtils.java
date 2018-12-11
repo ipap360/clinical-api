@@ -10,7 +10,11 @@ import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 @Log4j2
 @ToString
@@ -99,10 +103,15 @@ public class DBUtils {
     }
 
     public void delete(DBEntity... entities) throws DBOperationException {
+        delete(null, entities);
+    }
+
+    public void delete(BiFunction<Handle, DBEntity, Boolean> f, DBEntity... entities) throws DBOperationException {
         DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
             Arrays.stream(entities).forEach(entity -> {
                 Integer rows = _delete(db, entity);
-                if (rows != 1) {
+                Boolean ok = (f != null) ? f.apply(db, entity) : true;
+                if (rows != 1 || !ok) {
                     db.rollback();
                     throw new DBOperationException("Failed to delete " + entity.getDisplayName());
                 }
@@ -113,18 +122,21 @@ public class DBUtils {
 
     private Integer _insert(Handle db, DBEntity entity) {
 
-        int id = db.createQuery(entity.getTable().getIdSql())
-                .mapTo(Integer.class)
-                .findFirst()
-                .orElse(1);
+//        int id = db.createQuery(entity.getTable().getIdSql())
+//                .mapTo(Integer.class)
+//                .findFirst()
+//                .orElse(1);
 
         Update upd = db.createUpdate(entity.getTable().getCreateSql())
-                .bindMap(normalizeMap(entity.initialize(id, user).toMap()));
+                .bindMap(normalizeMap(entity.initialize(user).toMap()));
 
-        int rows = upd.execute();
+        Optional<Integer> id = upd
+                .executeAndReturnGeneratedKeys("ID")
+                .mapTo(Integer.class)
+                .findFirst();
 
-        if (rows == 1) {
-            return id;
+        if (id.isPresent()) {
+            return id.get();
         }
 
         return null;
