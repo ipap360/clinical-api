@@ -31,14 +31,14 @@ public class UsersEndpoint {
         String key = crc.getHeaderString("ADMIN");
         String masterKey = WebUtl.conf().getAdmin();
         if (masterKey != null && !masterKey.equals(key)) {
-            throw new DomainException("You do not have adequate permissions to perform this action");
+            throw new RuntimeException("You do not have adequate permissions to perform this action");
         }
 
         form.validate();
 
         Optional<Integer> id = (new UserDao()).findByUsername(form.getUsername());
         if (id.isPresent()) {
-            throw new DomainException("This username already exists!");
+            throw new RuntimeException("This username already exists!");
         }
 
         User user = new User().load(form);

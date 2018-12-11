@@ -13,6 +13,8 @@ public class CalendarEventCopyForm {
 
     private String notes;
 
+    private Boolean noWeekOverlapCheck;
+
     CalendarEventCopyForm validate(CalendarEvent previous) {
         HashMap errors = new HashMap();
         if (getDate() == null) {

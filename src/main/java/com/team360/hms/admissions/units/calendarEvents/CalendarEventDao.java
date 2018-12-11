@@ -5,8 +5,10 @@ import com.team360.hms.admissions.db.DB;
 import com.team360.hms.admissions.db.DBMapMapper;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @AllArgsConstructor
 public class CalendarEventDao {
@@ -30,5 +32,15 @@ public class CalendarEventDao {
                 .list());
     }
 
+    public Optional<Map<String, Object>> checkOverlap(Integer id, String from, String to, Integer patientId) {
+        final String sql = "SELECT A.ADMISSION_DATE, P.NAME FROM ADMISSIONS A INNER JOIN PATIENTS P ON P.ID = A.PATIENT_ID WHERE A.ADMISSION_DATE BETWEEN :FROM_DATE AND :TO_DATE AND A.PATIENT_ID = :PATIENT_ID AND A.ID <> :ID";
+        return DB.get().withHandle(db -> db.createQuery(sql)
+                .bind("ID", id != null ? id : 0)
+                .bind("FROM_DATE", from)
+                .bind("TO_DATE", to)
+                .bind("PATIENT_ID", patientId)
+                .map(new DBMapMapper(CaseFormat.LOWER_CAMEL))
+                .findFirst());
+    }
 
 }

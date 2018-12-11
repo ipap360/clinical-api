@@ -17,7 +17,7 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
         JSONObject o = new JSONObject();
 
-        o.put("name", exception.getClass().getCanonicalName());
+        o.put("name", exception.getClass().getSimpleName());
         o.put("message", exception.getMessage());
 
         log.error(exception.getLocalizedMessage(), exception);

@@ -79,7 +79,7 @@ public class DBMapMapper implements RowMapper<Map<String, Object>> {
                             try {
                                 value = new String(
                                         AES_GCM.decrypt(
-                                                secret.getBytes(),
+                                                secret.getBytes("UTF-8"),
                                                 Base64.getDecoder().decode(value),
                                                 null
                                         )

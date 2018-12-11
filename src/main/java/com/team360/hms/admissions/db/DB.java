@@ -66,7 +66,9 @@ public final class DB {
     }
 
     public static void stop() {
-        instance.destroy();
+        if (instance != null) {
+            instance.destroy();
+        }
         instance = null;
     }
 

@@ -18,7 +18,7 @@ public class GenericExceptionMapper implements ExceptionMapper<Throwable> {
         exception.printStackTrace();
 
         JSONObject o = new JSONObject();
-        o.put("name", exception.getClass().getCanonicalName());
+        o.put("name", exception.getClass().getSimpleName());
         o.put("message", exception.getMessage());
 
         log.error(exception.getLocalizedMessage(), exception);

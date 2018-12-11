@@ -1,8 +1,10 @@
 package com.team360.hms.admissions.units.calendarEvents;
 
 import com.team360.hms.admissions.common.exceptions.FormValidationException;
+import com.team360.hms.admissions.units.WebUtl;
 import lombok.Data;
 
+import javax.ws.rs.core.SecurityContext;
 import java.time.LocalDate;
 import java.util.HashMap;
 
@@ -27,7 +29,9 @@ public class CalendarEventForm {
 
     private LocalDate originalDate;
 
-    CalendarEventForm load(CalendarEvent event, CalendarEvent originalEvent) {
+    private Boolean noWeekOverlapCheck;
+
+    CalendarEventForm load(SecurityContext sc, CalendarEvent event) {
         setId(event.getId());
         setPatient(event.getPatientId());
         setDate(event.getAdmissionDate());
@@ -35,6 +39,8 @@ public class CalendarEventForm {
         setNotes(event.getNotes());
         setIsPostponed(event.getIsPostponed());
         setIsCopied(event.getIsCopied());
+
+        CalendarEvent originalEvent = getOriginalEvent(sc, event);
         if (originalEvent != null) {
             setPostponeId(originalEvent.getId());
             setOriginalDate(originalEvent.getAdmissionDate());
@@ -42,20 +48,34 @@ public class CalendarEventForm {
         return this;
     }
 
-    CalendarEventForm validate() {
+    private CalendarEvent getOriginalEvent(SecurityContext sc, CalendarEvent event) {
+        CalendarEvent originalEvent = null;
+        if (event.getPostponeId() != null && event.getPostponeId() != 0) {
+            originalEvent = new CalendarEvent();
+            WebUtl.db(sc).read(originalEvent.setId(event.getPostponeId()));
+        }
+        return originalEvent;
+    }
+
+    CalendarEventForm validate(SecurityContext sc) {
         HashMap errors = new HashMap();
+
         if (getPatient() == null) {
             errors.put("patient", "Please select a patient");
         }
+
         if (getDate() == null) {
             errors.put("date", "Please select a valid date");
         }
+
         if (getDuration() == null) {
             errors.put("duration", "Please select the duration");
         }
+
         if (!errors.isEmpty()) {
             throw new FormValidationException(errors);
         }
+
         return this;
     }
 

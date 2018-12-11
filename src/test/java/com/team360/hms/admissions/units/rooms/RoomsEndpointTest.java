@@ -27,7 +27,7 @@ public class RoomsEndpointTest {
             for (int j = i; j < total + 1; j++) {
                 int[] free = freePerGender(sub, total, i, j);
                 freeF[j] = free[1];
-                System.out.println("Free roooms if M:" + i + "and F:" + j + " = M:" + free[0] + ",F:" + free[1]);
+//                System.out.println("Free roooms if M:" + i + "and F:" + j + " = M:" + free[0] + ",F:" + free[1]);
                 if (j > 0) {
                     assertTrue(freeF[j] < freeF[j - 1] || (freeF[j] == 0 && freeF[j-1] == 0));
                 }

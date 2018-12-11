@@ -13,7 +13,9 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.Locale;
 
 @Slf4j
 @ToString
@@ -23,9 +25,11 @@ public class AccessToken {
     private static final int TOKEN_EXPIRY = WebServerManager.get().getAccessTokenTimeout();
     private static final String TOKEN_ISSUER = "nobody";
     private static final String TOKEN_CLAIM_USER = "userId";
+    private static final String TOKEN_CLAIM_NAME = "name";
+    private static final String TOKEN_CLAIM_LOCALE = "locale";
+    private static final String TOKEN_CLAIM_TIMEZONE = "tz";
+
     private static Algorithm ALGORITHM;
-//    private static final String TOKEN_CLAIM_KEY = "tokenId";
-//    private static final String TOKEN_CLAIM_NAME = "displayName";
 
     static {
         try {
@@ -39,24 +43,20 @@ public class AccessToken {
     private String value;
 
     @Getter
-    private int userId;
+    private WebUser user;
 
-    @Getter
-    private String displayName;
-
-    private AccessToken(int userId) {
-
-        this.userId = userId;
-//        this.refreshTokenId = refreshTokenId;
-
+    private AccessToken(int userId, String name, String locale, String tz) {
         this.value = JWT.create()
                 .withIssuer(TOKEN_ISSUER)
                 .withExpiresAt(new Date(System.currentTimeMillis() + TOKEN_EXPIRY * 1000))
                 .withIssuedAt(new Date())
                 .withClaim(TOKEN_CLAIM_USER, userId)
-//                .withClaim(TOKEN_CLAIM_KEY, refreshTokenId)
-//                .withClaim(TOKEN_CLAIM_NAME, displayName)
+                .withClaim(TOKEN_CLAIM_NAME, name)
+                .withClaim(TOKEN_CLAIM_LOCALE, locale)
+                .withClaim(TOKEN_CLAIM_TIMEZONE, tz)
                 .sign(ALGORITHM);
+
+        this.user = new WebUser(userId, name, locale, tz);
     }
 
     private AccessToken(String value, Long leeway) {
@@ -73,9 +73,13 @@ public class AccessToken {
             DecodedJWT jwt = verification.build().verify(value);
 
             this.value = value;
-            this.userId = jwt.getClaim(TOKEN_CLAIM_USER).asInt();
-//            this.refreshTokenId = jwt.getClaim(TOKEN_CLAIM_KEY).asInt();
-//            this.displayName = jwt.getClaim(TOKEN_CLAIM_NAME).asString();
+
+            int id = jwt.getClaim(TOKEN_CLAIM_USER).asInt();
+            String name = jwt.getClaim(TOKEN_CLAIM_NAME).asString();
+            String locale = jwt.getClaim(TOKEN_CLAIM_LOCALE).asString();
+            String tz = jwt.getClaim(TOKEN_CLAIM_TIMEZONE).asString();
+
+            this.user = new WebUser(id, name, locale, tz);
 
         } catch (TokenExpiredException e) {
             throw new AuthenticationException(AuthenticationException.EXPIRED, e.getMessage());
@@ -84,8 +88,8 @@ public class AccessToken {
         }
     }
 
-    public static AccessToken withClaims(int userId) {
-        return new AccessToken(userId);
+    public static AccessToken withClaims(int userId, String name, String locale, String tz) {
+        return new AccessToken(userId, name, locale, tz);
     }
 
     public static AccessToken parse(String accessToken) {

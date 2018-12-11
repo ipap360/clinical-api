@@ -24,10 +24,10 @@ public class HashedStringTest {
             System.out.println("test " + i);
             int len = 50; // rand.nextInt(100) + 1;
             String str = RandomToken.withLength(len).getValue();
-            System.out.println("test string: " + str);
+//            System.out.println("test string: " + str);
             Instant start = Instant.now();
             String hash = HashedString.of(str).getValue();
-            System.out.printf("Hashing completed in %dms%n", ChronoUnit.MILLIS.between(start, Instant.now()));
+//            System.out.printf("Hashing completed in %dms%n", ChronoUnit.MILLIS.between(start, Instant.now()));
             HashedString test = HashedString.fromHash(hash);
             assertTrue(test.isHashOf(str));
         }
