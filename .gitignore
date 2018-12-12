@@ -2,6 +2,7 @@
 # Project specific excludes
 #
 
+.temp
 /db
 /rabbit
 .env
