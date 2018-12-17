@@ -33,7 +33,7 @@ public class ProfileEndpoint {
         form.validate();
         User u = getUser();
         WebUtl.db(sc).upsert(u.load(form));
-        return Response.ok().build();
+        return Response.ok().entity(form.load(u)).build();
     }
 
     @POST
