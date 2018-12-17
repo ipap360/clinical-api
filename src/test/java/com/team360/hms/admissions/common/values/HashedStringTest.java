@@ -20,7 +20,7 @@ public class HashedStringTest {
 
     @Test
     public void all() {
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 2; i++) {
             System.out.println("test " + i);
             int len = 50; // rand.nextInt(100) + 1;
             String str = RandomToken.withLength(len).getValue();
