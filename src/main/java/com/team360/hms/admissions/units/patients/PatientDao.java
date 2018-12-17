@@ -6,6 +6,7 @@ import com.team360.hms.admissions.db.DBMapMapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class PatientDao {
 
@@ -17,5 +18,13 @@ public class PatientDao {
                 .list());
     }
 
+    public Optional<Integer> checkCodeExists(Integer id, String code) {
+        final String sql = "SELECT P.ID FROM PATIENTS P WHERE :CODE IS NOT NULL AND CODE = :CODE AND P.ID <> :ID";
+        return DB.get().withHandle(db -> db.createQuery(sql)
+                .bind("ID", id != null ? id : 0)
+                .bind("CODE", code)
+                .mapTo(Integer.class)
+                .findFirst());
+    }
 
 }

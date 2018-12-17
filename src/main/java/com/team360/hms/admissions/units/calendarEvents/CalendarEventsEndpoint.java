@@ -57,8 +57,12 @@ public class CalendarEventsEndpoint {
         form.setId(id);
         form.validate(sc);
         CalendarEvent event = new CalendarEvent();
+        if (id > 0) {
+            WebUtl.db(sc).read(event.setId(id));
+        }
+        LocalDate lastAdmissionDate = event.getAdmissionDate();
         event.load(form);
-        if (BooleanUtils.isNotTrue(form.getNoWeekOverlapCheck())) {
+        if (BooleanUtils.isNotTrue(form.getNoWeekOverlapCheck()) && (lastAdmissionDate == null || !form.getDate().isEqual(lastAdmissionDate))) {
             checkOverlap(sc, event);
         }
         WebUtl.db(sc).upsert(event);

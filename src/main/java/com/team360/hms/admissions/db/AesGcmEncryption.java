@@ -17,9 +17,9 @@ import java.util.Arrays;
  * <p>
  * The iv, encrypted content and auth tag will be encoded to the following format:
  * <p>
- * out = byte[] {x y y y y y y y y y y y y z z z ...}
+ * out = byte[] {x x x x y y y y y y y y y y y y z z z ...}
  * <p>
- * x = IV length as byte
+ * x = IV length as int (4 bytes)
  * y = IV bytes
  * z = content bytes (encrypted content, auth tag)
  *
