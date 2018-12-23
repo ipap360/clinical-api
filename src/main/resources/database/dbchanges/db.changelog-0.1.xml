@@ -71,7 +71,7 @@
             <column name="MONTH_OF_YEAR" type="int"/>
             <column name="YEAR_OF" type="int"/>
         </createTable>
-        <customChange class="com.team360.hms.admissions.data.PopulateDBDates"/>
+        <customChange class="com.timelyworks.clinical.data.PopulateDBDates"/>
         <rollback>
             <dropTable tableName="DATES"/>
         </rollback>

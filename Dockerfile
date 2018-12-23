@@ -1,5 +1,5 @@
 # fetch basic image
-FROM maven:3.6.0-jdk-8
+FROM maven:3.6-jdk-8
 
 # application placed into /opt/app
 RUN mkdir -p /opt/app
@@ -16,6 +16,8 @@ RUN mvn package
 
 # local application port
 EXPOSE 8080
+
+ENV LOG_LEVEL INFO
 
 # execute it
 CMD ["mvn", "exec:java"]
