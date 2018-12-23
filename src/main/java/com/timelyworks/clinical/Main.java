@@ -22,7 +22,11 @@ public class Main {
     public static final String BUILD_MODE = "BUILD_MODE";
     public static final String LOG_LEVEL = "LOG_LEVEL";
 
+    public static final String SQL_HOST = "SQL_HOST";
+    public static final String SQL_PORT = "SQL_PORT";
     public static final String SQL_URL = "SQL_URL";
+    public static final String DATABASE_NAME = "DATABASE_NAME";
+    public static final String DATABASE_CONFIG = "DATABASE_CONFIG";
     public static final String SQL_DRIVER = "SQL_DRIVER";
     public static final String SQL_USER = "SQL_USER";
     public static final String SQL_PASSWORD = "SQL_PASSWORD";
@@ -50,9 +54,11 @@ public class Main {
             getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
 
     private static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
-    private static final String DEFAULT_DB_NAME = "bed_management_db";
+    private static final String DEFAULT_DB_NAME = "clinical_db";
     private static final String DEFAULT_DB_CONFIG = "?zeroDateTimeBehavior=CONVERT_TO_NULL&createDatabaseIfNotExist=true&useSSL=false&characterEncoding=UTF8";
-    private static final String DEFAULT_DB_URL = "jdbc:mysql://localhost:3306/" + DEFAULT_DB_NAME + DEFAULT_DB_CONFIG;
+    private static final String DEFAULT_DB_HOST = "localhost";
+    private static final String DEFAULT_DB_PORT = "3306";
+    private static final String DEFAULT_DB_URL = "jdbc:mysql://%1$s:%2$s/%3$s%4$s";
     private static final String DEFAULT_DB_USER = "root";
     private static final String DEFAULT_URI = "http://0.0.0.0:8080";
     private static final String DEFAULT_CONTEXT = "/api/v1";
@@ -87,7 +93,10 @@ public class Main {
             opts.put(LOG_LEVEL, (DEBUG_MODE) ? "DEBUG" : "INFO");
 
             opts.put(SQL_DRIVER, DEFAULT_DRIVER);
-            opts.put(SQL_URL, DEFAULT_DB_URL);
+            opts.put(SQL_HOST, DEFAULT_DB_HOST);
+            opts.put(SQL_PORT, DEFAULT_DB_PORT);
+            opts.put(DATABASE_NAME, DEFAULT_DB_NAME);
+            opts.put(DATABASE_CONFIG, DEFAULT_DB_CONFIG);
             opts.put(SQL_USER, DEFAULT_DB_USER);
             opts.put(SQL_PASSWORD, DEFAULT_DB_USER);
 
@@ -106,6 +115,16 @@ public class Main {
 
             Map<String, String> env = System.getenv();
             opts.putAll(env);
+
+            if (opts.get(SQL_URL) == null) {
+                opts.put(SQL_URL, String.format(DEFAULT_DB_URL,
+                        opts.get(SQL_HOST),
+                        opts.get(SQL_PORT),
+                        opts.get(DATABASE_NAME),
+                        opts.get(DATABASE_CONFIG)));
+            }
+
+            log.info(opts.get(SQL_URL));
 
             List<String> encrypted = new ArrayList();
             encrypted.add("PATIENTS.NOTES");
