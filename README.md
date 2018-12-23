@@ -20,8 +20,4 @@ API of CliniCal, an admissions and bed management system for medical clinics
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
--   [Patrick Favre-Bulle](https://github.com/patrickfav)
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE.md) file for details
