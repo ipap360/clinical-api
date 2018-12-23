@@ -5,6 +5,9 @@ FROM maven:3.6-jdk-8
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 
+# utility for waiting other services
+COPY wait-for /opt/app/
+
 # selectively add the POM file and
 # install dependencies
 COPY pom.xml /opt/app/
