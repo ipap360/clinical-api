@@ -174,7 +174,7 @@ public class Main {
                         "DEBUG".equals(opts.get(LOG_LEVEL)));
             }
 
-            if (opts.get(BUILD_MODE).equals("IDE")) {
+            if ("IDE".equals(opts.get(BUILD_MODE))) {
                 System.out.println("Press Enter to exit..");
                 System.in.read();
                 log.info("Exiting...");

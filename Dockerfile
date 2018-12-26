@@ -1,6 +1,8 @@
 # fetch basic image
 FROM maven:3.6-jdk-8
 
+RUN apt-get -q update && apt-get -qy install netcat
+
 # application placed into /opt/app
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
