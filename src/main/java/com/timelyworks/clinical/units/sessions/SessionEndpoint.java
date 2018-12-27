@@ -6,7 +6,9 @@ import com.timelyworks.clinical.common.values.RandomToken;
 import com.timelyworks.clinical.units.WebUtl;
 import com.timelyworks.clinical.units.users.User;
 import com.timelyworks.clinical.units.users.UserDao;
-import com.timelyworks.clinical.web.*;
+import com.timelyworks.clinical.web.AccessToken;
+import com.timelyworks.clinical.web.RefreshToken;
+import com.timelyworks.clinical.web.WebConfig;
 import com.timelyworks.clinical.web.filters.IFilter;
 import com.timelyworks.clinical.web.filters.Secured;
 import lombok.extern.log4j.Log4j2;
@@ -27,7 +29,6 @@ public class SessionEndpoint {
 
     private static final String INVALID_CREDENTIALS = "Invalid username or password";
     private static final String SESSION_EXPIRED = "This session has expired";
-    private static final Date ZERO_DATE = new Date(0);
     private static final int MIN_TOKEN_DAYS = 5;
 
     @Context
@@ -158,16 +159,18 @@ public class SessionEndpoint {
 
         WebConfig conf = WebUtl.conf();
 
-        NewCookie rc1 = setExpired(cookies.get(conf.getRefreshTokenServerCookie()));
-        NewCookie rc2 = setExpired(cookies.get(conf.getRefreshTokenClientCookie()));
-        NewCookie ac = setExpired(cookies.get(conf.getAccessTokenCookie()));
-        NewCookie xc = setExpired(cookies.get(conf.getXsrfCookie()));
+        String path = conf.getContext() + "/sessions";
+
+        NewCookie rc1 = expire(conf.getRefreshTokenServerCookie(), path);
+        NewCookie rc2 = expire(conf.getRefreshTokenClientCookie(), path);
+        NewCookie ac = expire(conf.getAccessTokenCookie(), "/");
+        NewCookie xc = expire(conf.getXsrfCookie(), "/");
 
         return Response.ok().cookie(rc1, rc2, ac, xc).build();
     }
 
-    private NewCookie setExpired(Cookie c) {
-        return (c == null) ? null : new NewCookie(c, null, 0, ZERO_DATE, false, false);
+    private NewCookie expire(String name, String path) {
+        return new NewCookie(name, null, path, "", NewCookie.DEFAULT_VERSION, null, 0, new Date(), sc.isSecure(), false);
     }
 
     private Response wrapResponse(SessionAcquiredSuccessfully entity) {
@@ -175,48 +178,56 @@ public class SessionEndpoint {
         WebConfig conf = WebUtl.conf();
         int expiry = conf.getRefreshTokenTimeout();
 
-        WebCookie ac = WebCookie.builder()
-                .name(conf.getAccessTokenCookie())
-                .body(entity.getAccessToken())
-                .expiry(expiry)
-                .isSecure(sc.isSecure())
-                .build();
+        NewCookie ac = new NewCookie(
+                conf.getAccessTokenCookie(),
+                entity.getAccessToken(),
+                "/",
+                null,
+                null,
+                expiry,
+                sc.isSecure(),
+                true);
 
-        WebCookie xc = WebCookie.builder()
-                .name(conf.getXsrfCookie())
-                .body(RandomToken.withLength(20).getValue())
-                .expiry(expiry)
-                .httpOnly(false)
-                .isSecure(sc.isSecure())
-                .build();
+        NewCookie xc = new NewCookie(
+                conf.getXsrfCookie(),
+                RandomToken.withLength(20).getValue(),
+                "/",
+                null,
+                null,
+                expiry,
+                sc.isSecure(),
+                false);
 
         String token = entity.getRefreshToken();
         if (token == null) {
-            return Response.ok().cookie(ac.getValue(), xc.getValue()).entity(entity.getDetails()).build();
+            return Response.ok().cookie(ac, xc).entity(entity.getDetails()).build();
         }
 
         final int pos = token.length() / 2;
         String[] parts = {token.substring(0, pos), token.substring(pos)};
         String path = conf.getContext() + "/sessions";
 
-        WebCookie rc1 = WebCookie.builder()
-                .name(conf.getRefreshTokenServerCookie())
-                .path(path)
-                .expiry(expiry)
-                .body(parts[0])
-                .isSecure(sc.isSecure())
-                .build();
+        NewCookie rc1 = new NewCookie(
+                conf.getRefreshTokenServerCookie(),
+                parts[0],
+                path,
+                null,
+                null,
+                expiry,
+                sc.isSecure(),
+                true);
 
-        WebCookie rc2 = WebCookie.builder()
-                .name(conf.getRefreshTokenClientCookie())
-                .path(path)
-                .expiry(expiry)
-                .httpOnly(false)
-                .body(parts[1])
-                .isSecure(sc.isSecure())
-                .build();
+        NewCookie rc2 = new NewCookie(
+                conf.getRefreshTokenClientCookie(),
+                parts[1],
+                path,
+                null,
+                null,
+                expiry,
+                sc.isSecure(),
+                false);
 
-        return Response.ok().cookie(rc1.getValue(), rc2.getValue(), ac.getValue(), xc.getValue()).entity(entity.getDetails()).build();
+        return Response.ok().cookie(rc1, rc2, ac, xc).entity(entity.getDetails()).build();
     }
 
 }

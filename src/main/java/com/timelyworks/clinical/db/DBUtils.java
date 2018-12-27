@@ -26,40 +26,34 @@ public class DBUtils {
         this.user = new DBUser(userId);
     }
 
-    private static Map<String, Object> normalizeMap(Map<String, Object> map) {
-        // Base64.getEncoder().encodeToString(AES_GCM.encrypt(encKey.getBytes(), value.getBytes(), null))
-        map.entrySet().stream().forEach(e -> {
-            Object v = e.getValue();
-            if (v instanceof LocalDate) {
-                e.setValue(DateUtils.toSqlDate((LocalDate) v));
-            } else if (v instanceof LocalTime) {
-                e.setValue(DateUtils.toSqlTime((LocalTime) v));
-            } else if (v instanceof Instant) {
-                e.setValue(DateUtils.toTimestamp((Instant) v));
-            }
-        });
-        return map;
-    }
-
     public void create(DBEntity... entities) {
-        DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
-            Arrays.stream(entities).forEach(entity -> {
-                Integer id = _insert(db, entity);
-                if (id == null) {
-                    throw new DBOperationException("Failed to insert " + entity.getDisplayName());
-                }
+        try {
+            DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
+                Arrays.stream(entities).forEach(entity -> {
+                    Integer id = _insert(db, entity);
+                    if (id == null) {
+                        throw new DBOperationException("Failed to insert " + entity.getDisplayName());
+                    }
+                });
             });
-        });
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+            throw new DBOperationException("Database operation failed");
+        }
     }
 
     public void read(DBEntity... entities) {
-        Arrays.stream(entities).forEach(entity -> {
-            read(entity);
-        });
+        try {
+            Arrays.stream(entities).forEach(entity -> {
+                read(entity);
+            });
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+            throw new DBOperationException("Database operation failed");
+        }
     }
 
-    public void read(DBEntity entity) {
-
+    private void read(DBEntity entity) {
         Optional<Map<String, Object>> map = DB.get().withHandle(db -> db.createQuery(entity.getTable().getReadSql())
                 .bind("ID", entity.getId())
                 .map(new DBMapMapper())
@@ -72,63 +66,73 @@ public class DBUtils {
         entity.load(map.get());
     }
 
-    public void update(DBEntity... entities) throws DBOperationException {
-        DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
-            Arrays.stream(entities).forEach(entity -> {
-                Integer rows = _update(db, entity);
-                if (rows != 1) {
-                    throw new DBOperationException("Failed to update " + entity.getDisplayName());
-                }
-            });
-        });
-    }
-
-    public void upsert(DBEntity... entities) throws DBOperationException {
-        DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
-            Arrays.stream(entities).forEach(entity -> {
-                if (entity.getId() == 0) {
-                    Integer id = _insert(db, entity);
-                    if (id == null) {
-                        throw new DBOperationException("Failed to insert " + entity.getDisplayName());
-                    }
-                    entity.setId(id);
-                } else {
+    public void update(DBEntity... entities) {
+        try {
+            DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
+                Arrays.stream(entities).forEach(entity -> {
                     Integer rows = _update(db, entity);
                     if (rows != 1) {
                         throw new DBOperationException("Failed to update " + entity.getDisplayName());
                     }
-                }
+                });
             });
-        });
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+            throw new DBOperationException("Database operation failed");
+        }
     }
 
-    public void delete(DBEntity... entities) throws DBOperationException {
+    public void upsert(DBEntity... entities) {
+        try {
+            DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
+                Arrays.stream(entities).forEach(entity -> {
+                    if (entity.getId() == 0) {
+                        Integer id = _insert(db, entity);
+                        if (id == null) {
+                            throw new DBOperationException("Failed to insert " + entity.getDisplayName());
+                        }
+                        entity.setId(id);
+                    } else {
+                        Integer rows = _update(db, entity);
+                        if (rows != 1) {
+                            throw new DBOperationException("Failed to update " + entity.getDisplayName());
+                        }
+                    }
+                });
+            });
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+            throw new DBOperationException("Database operation failed");
+        }
+    }
+
+    public void delete(DBEntity... entities) {
         delete(null, entities);
     }
 
-    public void delete(BiFunction<Handle, DBEntity, Boolean> f, DBEntity... entities) throws DBOperationException {
-        DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
-            Arrays.stream(entities).forEach(entity -> {
-                Integer rows = _delete(db, entity);
-                Boolean ok = (f != null) ? f.apply(db, entity) : true;
-                if (rows != 1 || !ok) {
-                    db.rollback();
-                    throw new DBOperationException("Failed to delete " + entity.getDisplayName());
-                }
-                entity.load(new HashMap<String, Object>());
+    public void delete(BiFunction<Handle, DBEntity, Boolean> f, DBEntity... entities) {
+        try {
+            DB.get().useTransaction(TransactionIsolationLevel.SERIALIZABLE, db -> {
+                Arrays.stream(entities).forEach(entity -> {
+                    Integer rows = _delete(db, entity);
+                    Boolean ok = (f != null) ? f.apply(db, entity) : true;
+                    if (rows != 1 || !ok) {
+                        db.rollback();
+                        throw new DBOperationException("Failed to delete " + entity.getDisplayName());
+                    }
+                    entity.load(new HashMap<String, Object>());
+                });
             });
-        });
+        } catch (Exception e) {
+            log.debug(e.getMessage(), e);
+            throw new DBOperationException("Database operation failed");
+        }
     }
 
     private Integer _insert(Handle db, DBEntity entity) {
 
-//        int id = db.createQuery(entity.getTable().getIdSql())
-//                .mapTo(Integer.class)
-//                .findFirst()
-//                .orElse(1);
-
         Update upd = db.createUpdate(entity.getTable().getCreateSql())
-                .bindMap(normalizeMap(entity.initialize(user).toMap()));
+                .bindMap(entity.initialize(user).toMap());
 
         Optional<Integer> id = upd
                 .executeAndReturnGeneratedKeys("ID")
@@ -144,7 +148,7 @@ public class DBUtils {
 
     private int _update(Handle db, DBEntity entity) {
         return db.createUpdate(entity.getTable().getUpdateSql())
-                .bindMap(normalizeMap(entity.markModified(user).toMap()))
+                .bindMap(entity.markModified(user).toMap())
                 .execute();
     }
 
