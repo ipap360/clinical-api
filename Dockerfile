@@ -8,7 +8,9 @@ RUN mkdir -p /opt/app
 WORKDIR /opt/app
 
 # utility for waiting other services
-COPY wait-for /opt/app/
+COPY wait-for.sh /opt/app/wait-for.sh
+RUN chmod u+x wait-for.sh
+RUN chmod u+x /usr/local/bin/mvn-entrypoint.sh
 
 # selectively add the POM file and
 # install dependencies
