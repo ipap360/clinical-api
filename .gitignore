@@ -62,3 +62,4 @@ pom.xml.tag
 dependency-reduced-pom.xml
 *.txt
 /build-tag-push.sh
+/build.sh
