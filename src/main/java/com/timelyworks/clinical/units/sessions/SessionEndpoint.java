@@ -1,5 +1,6 @@
 package com.timelyworks.clinical.units.sessions;
 
+import com.google.common.hash.Hashing;
 import com.timelyworks.clinical.common.exceptions.AuthenticationException;
 import com.timelyworks.clinical.common.values.HashedString;
 import com.timelyworks.clinical.common.values.RandomToken;
@@ -15,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -100,8 +102,9 @@ public class SessionEndpoint {
 
         Session session = new Session();
         WebUtl.db(sc).read(session.setId(id.get()));
-        HashedString secret = HashedString.fromHash(session.getSecret());
-        if (!secret.isHashOf(refreshToken)) {
+        if (!Hashing.sha256()
+                .hashString(refreshToken, StandardCharsets.UTF_8)
+                .toString().equals(session.getSecret())) {
             throw new AuthenticationException(AuthenticationException.FAILED, SESSION_EXPIRED);
         }
 
@@ -119,7 +122,7 @@ public class SessionEndpoint {
         RefreshToken refreshToken = null;
         if (session.getExpiresAt() == null || session.getExpiresAt().minus(MIN_TOKEN_DAYS, ChronoUnit.DAYS).isBefore(Instant.now())) {
             refreshToken = RefreshToken.generate();
-            session.setSecret(refreshToken.getHash());
+            session.setSecret(refreshToken.getHash256());
             session.setExpiresAt(refreshToken.getExpiry());
         }
 
@@ -161,15 +164,15 @@ public class SessionEndpoint {
 
         String path = conf.getContext() + "/sessions";
 
-        NewCookie rc1 = expire(conf.getRefreshTokenServerCookie(), path);
-        NewCookie rc2 = expire(conf.getRefreshTokenClientCookie(), path);
-        NewCookie ac = expire(conf.getAccessTokenCookie(), "/");
-        NewCookie xc = expire(conf.getXsrfCookie(), "/");
+        NewCookie rc1 = emptyCookie(conf.getRefreshTokenServerCookie(), path);
+        NewCookie rc2 = emptyCookie(conf.getRefreshTokenClientCookie(), path);
+        NewCookie ac = emptyCookie(conf.getAccessTokenCookie(), "/");
+        NewCookie xc = emptyCookie(conf.getXsrfCookie(), "/");
 
         return Response.ok().cookie(rc1, rc2, ac, xc).build();
     }
 
-    private NewCookie expire(String name, String path) {
+    private NewCookie emptyCookie(String name, String path) {
         return new NewCookie(name, null, path, "", NewCookie.DEFAULT_VERSION, null, 0, new Date(), sc.isSecure(), false);
     }
 

@@ -13,8 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 public class HashedString {
 
     private static final int MEMORY = 128000;
-    private static final int PARALLELISM = 4;
-    private static final int ITERATIONS = 40;
+    private static final int PARALLELISM = 1;
+    private static final int ITERATIONS = 25;
 
     private static final Argon2 argon2 = Argon2Factory.create();
 

@@ -1,11 +1,13 @@
 package com.timelyworks.clinical.web;
 
+import com.google.common.hash.Hashing;
 import com.timelyworks.clinical.common.values.HashedString;
 import com.timelyworks.clinical.common.values.RandomToken;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 @ToString
@@ -26,8 +28,10 @@ public class RefreshToken {
         return new RefreshToken();
     }
 
-    public String getHash() {
-        return HashedString.of(value).getValue();
+    public String getHash256() {
+        return Hashing.sha256()
+                .hashString(value, StandardCharsets.UTF_8)
+                .toString();
     }
 
     public Instant getExpiry() {
