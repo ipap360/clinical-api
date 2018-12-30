@@ -1,7 +1,6 @@
 package com.timelyworks.clinical.web;
 
 import com.google.common.hash.Hashing;
-import com.timelyworks.clinical.common.values.HashedString;
 import com.timelyworks.clinical.common.values.RandomToken;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

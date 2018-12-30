@@ -1,15 +1,11 @@
 package com.timelyworks.clinical.db;
 
-import com.timelyworks.clinical.common.utils.DateUtils;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.statement.Update;
 import org.jdbi.v3.core.transaction.TransactionIsolationLevel;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
