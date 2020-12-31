@@ -34,7 +34,7 @@
         <emailaddress.version>1.1.0</emailaddress.version>
 
         <!-- test -->
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
 
         <!--build-->
         <maven.compile.source>1.8</maven.compile.source>
